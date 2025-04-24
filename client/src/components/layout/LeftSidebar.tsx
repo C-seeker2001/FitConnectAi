@@ -24,7 +24,7 @@ export default function LeftSidebar() {
       <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
         {user && (
           <>
-            <div className="flex items-center mb-4">
+            <Link href={`/profile/${user.id}`} className="flex items-center mb-4">
               <div className="h-12 w-12 rounded-full mr-3 overflow-hidden">
                 <img 
                   src={user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + user.username} 
@@ -36,7 +36,7 @@ export default function LeftSidebar() {
                 <h3 className="font-semibold">{user.username}</h3>
                 <p className="text-sm text-secondary">@{user.username.toLowerCase()}</p>
               </div>
-            </div>
+            </Link>
 
             <div className="grid grid-cols-3 text-center mb-4 text-sm">
               {loadingStats ? (

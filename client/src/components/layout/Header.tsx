@@ -185,7 +185,7 @@ export default function Header() {
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                     <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer flex w-full">
+                      <Link href={`/profile/${user.id}`} className="cursor-pointer flex w-full">
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
                       </Link>
