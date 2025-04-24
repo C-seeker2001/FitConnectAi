@@ -471,26 +471,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
+      console.log(`Getting workout stats for user ${req.session.userId}...`);
+      
+      // Get basic workout counts
       const totalWorkouts = await storage.getUserWorkoutCount(req.session.userId);
+      console.log(`Total workouts: ${totalWorkouts}`);
+      
       const weeklyWorkouts = await storage.getUserWeeklyWorkoutCount(req.session.userId);
+      console.log(`Weekly workouts: ${weeklyWorkouts}`);
+      
+      // Get follow counts
       const following = await storage.getUserFollowingCount(req.session.userId);
+      console.log(`Following count: ${following}`);
+      
       const followers = await storage.getUserFollowerCount(req.session.userId);
+      console.log(`Followers count: ${followers}`);
+      
+      // Get streak
       const currentStreak = await storage.getUserWorkoutStreak(req.session.userId);
+      console.log(`Current streak: ${currentStreak}`);
       
       // Get user to get the weekly goal
       const user = await storage.getUser(req.session.userId);
       const weeklyGoal = user ? user.weeklyGoal || 4 : 4;
+      console.log(`Weekly goal: ${weeklyGoal}`);
       
       // Calculate monthly average (workouts per month)
-      const monthlyAverage = await storage.getUserMonthlyWorkoutAverage(req.session.userId);
+      let monthlyAverage = 0;
+      try {
+        monthlyAverage = await storage.getUserMonthlyWorkoutAverage(req.session.userId);
+      } catch (err) {
+        console.error('Error getting monthly average:', err);
+      }
+      console.log(`Monthly average: ${monthlyAverage}`);
       
       // Get workout frequency (for charts)
-      const frequency = await storage.getUserWorkoutFrequency(req.session.userId);
+      let frequency = [];
+      try {
+        frequency = await storage.getUserWorkoutFrequency(req.session.userId);
+      } catch (err) {
+        console.error('Error getting frequency:', err);
+      }
       
       // Get workout volume over time (for charts)
-      const volume = await storage.getUserWorkoutVolume(req.session.userId);
+      let volume = [];
+      try {
+        volume = await storage.getUserWorkoutVolume(req.session.userId);
+      } catch (err) {
+        console.error('Error getting volume:', err);
+      }
       
-      res.json({
+      // Create response
+      const response = {
         totalWorkouts,
         weeklyWorkouts,
         following,
@@ -500,8 +532,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         monthlyAverage,
         frequency,
         volume,
-      });
+      };
+      
+      console.log('Sending workout stats:', response);
+      res.json(response);
     } catch (error) {
+      console.error('Error in /api/workouts/stats:', error);
       res.status(500).json({ message: "Server error" });
     }
   });
