@@ -134,9 +134,9 @@ export default function Profile() {
     );
   }
 
-  if (!user || !profile) {
+  if (!user || !profile || !profile.username) {
     // If user is logged in but profile couldn't be loaded, show error message
-    if (user && profileError) {
+    if (user && (profileError || !profile || !profile.username)) {
       return (
         <div className="text-center py-10">
           <h2 className="text-xl font-semibold mb-2">Error Loading Profile</h2>
@@ -148,6 +148,20 @@ export default function Profile() {
       );
     }
     return null;
+  }
+  
+  // Ensure all required profile data is available
+  if (!profile.username || !profile.id) {
+    console.error("Profile data incomplete:", profile);
+    return (
+      <div className="text-center py-10">
+        <h2 className="text-xl font-semibold mb-2">Error Loading Profile</h2>
+        <p className="text-secondary mb-4">Profile data is incomplete. Please try again later.</p>
+        <Button onClick={() => window.location.href = "/"}>
+          Return to Home
+        </Button>
+      </div>
+    );
   }
   
   const isCurrentUser = user.id === userId;
