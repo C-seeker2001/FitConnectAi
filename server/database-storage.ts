@@ -700,14 +700,30 @@ export class DatabaseStorage implements IStorage {
     const followingIds = followingList.map(f => f.followingId);
     followingIds.push(userId); // Include user's own posts
     
-    // Get posts from those users
-    const postsList = await db
-      .select()
-      .from(posts)
-      .where(sql`${posts.userId} IN (${followingIds.join(',')})`)
-      .orderBy(desc(posts.createdAt));
+    // If no posts should be returned, return empty array
+    if (followingIds.length === 0) {
+      return [];
+    }
     
-    // Enrich posts with user, workout, and count data (same as getUserPosts)
+    // Get posts from those users
+    let postsList;
+    if (followingIds.length === 1) {
+      // Just the user's own posts
+      postsList = await db
+        .select()
+        .from(posts)
+        .where(eq(posts.userId, followingIds[0]))
+        .orderBy(desc(posts.createdAt));
+    } else {
+      // Multiple users' posts
+      postsList = await db
+        .select()
+        .from(posts)
+        .where(sql`${posts.userId} = ANY(ARRAY[${followingIds.join(',')}])`)
+        .orderBy(desc(posts.createdAt));
+    }
+    
+    // Enrich posts with user, workout, and count data
     return Promise.all(postsList.map(async post => {
       // Get user info
       const [user] = await db
