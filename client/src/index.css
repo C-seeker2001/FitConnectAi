@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 20%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 20%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 20%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --primary: 217 27% 22%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 223 10% 39%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 16 79% 63%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --success: 122 39% 49%;
+  --success-foreground: 0 0% 98%;
+  --ring: 222 14% 28%;
+  --radius: 0.5rem;
+
+  --chart-1: 16 79% 63%;
+  --chart-2: 217 27% 22%;
+  --chart-3: 223 10% 39%;
+  --chart-4: 122 39% 49%;
+  --chart-5: 196 80% 53%;
+}
+
+.dark {
+  --background: 224 71% 4%;
+  --foreground: 0 0% 98%;
+  --muted: 220 63% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 224 71% 4%;
+  --popover-foreground: 0 0% 98%;
+  --card: 224 71% 4%; 
+  --card-foreground: 0 0% 98%;
+  --border: 220 63% 15.9%;
+  --input: 220 63% 15.9%; 
+  --primary: 217 33% 17%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 223 10% 39%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 16 79% 63%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --success: 142 68% 29%;
+  --success-foreground: 0 0% 98%;
+  --ring: 222 14% 28%;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-gray-50 text-foreground font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans;
+  }
+}
+
+.monospace {
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+}
+
+.card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.fab {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.tab-active {
+  border-bottom: 3px solid hsl(var(--accent));
+  color: hsl(var(--primary));
+}
+
+@media (min-width: 768px) {
+  .desktop-sidebar {
+    height: calc(100vh - 72px);
+  }
+}
