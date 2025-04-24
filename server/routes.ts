@@ -3,10 +3,10 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
 import { z } from "zod";
-import { insertUserSchema, insertWorkoutSchema, insertPostSchema, insertCommentSchema, follows } from "@shared/schema";
+import { insertUserSchema, insertWorkoutSchema, insertPostSchema, insertCommentSchema, follows, users, posts, comments, likes, workouts, exercises } from "@shared/schema";
 import MemoryStore from "memorystore";
 import { db } from "./db";
-import { eq, count } from "drizzle-orm";
+import { eq, count, and, desc, inArray } from "drizzle-orm";
 
 const SessionStore = MemoryStore(session);
 
@@ -647,6 +647,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error in debug feed route:", error);
+      res.status(500).json({ message: "Server error", error: String(error) });
+    }
+  });
+  
+  // Debug login route (for testing only)
+  app.get("/api/debug/login/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      // Get the user
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId));
+      
+      if (user.length === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Set session
+      req.session.userId = userId;
+      
+      console.log(`Logged in as user ${userId}`);
+      
+      // Don't send password to client
+      const { password, ...userWithoutPassword } = user[0];
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error in debug login:", error);
       res.status(500).json({ message: "Server error", error: String(error) });
     }
   });
