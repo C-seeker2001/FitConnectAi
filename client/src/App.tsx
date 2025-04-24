@@ -6,6 +6,7 @@ import Discover from "@/pages/discover";
 import Profile from "@/pages/profile";
 import Auth from "@/pages/auth";
 import NotFound from "@/pages/not-found";
+import ProgramDetail from "@/pages/program";
 import AppLayout from "@/components/layout/AppLayout";
 import { AuthProvider } from "@/hooks/use-auth";
 
@@ -20,6 +21,7 @@ function App() {
           <Route path="/discover" component={Discover} />
           <Route path="/profile" component={Profile} />
           <Route path="/auth" component={Auth} />
+          <Route path="/program/:id" component={ProgramDetail} />
           <Route component={NotFound} />
         </Switch>
       </AppLayout>

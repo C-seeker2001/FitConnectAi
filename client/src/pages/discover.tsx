@@ -89,6 +89,10 @@ export default function Discover() {
     }
   };
 
+  const handleViewProgram = (programId: number) => {
+    navigate(`/program/${programId}`);
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth?mode=login');
@@ -183,7 +187,13 @@ export default function Discover() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button className="w-full" variant="outline">View Program</Button>
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={() => handleViewProgram(program.id)}
+                    >
+                      View Program
+                    </Button>
                   </CardFooter>
                 </Card>
               ))}
