@@ -10,6 +10,7 @@ import {
   Bookmark, 
   Settings 
 } from "lucide-react";
+import UserStatsDisplay from "@/components/shared/UserStatsDisplay";
 
 export default function LeftSidebar() {
   const { user } = useAuth();
@@ -38,39 +39,29 @@ export default function LeftSidebar() {
               </div>
             </Link>
 
-            <div className="grid grid-cols-3 text-center mb-4 text-sm">
-              {loadingStats ? (
-                <>
-                  <div>
-                    <Skeleton className="h-6 w-12 mx-auto mb-1" />
-                    <div className="text-secondary text-xs">Workouts</div>
-                  </div>
-                  <div>
-                    <Skeleton className="h-6 w-12 mx-auto mb-1" />
-                    <div className="text-secondary text-xs">Following</div>
-                  </div>
-                  <div>
-                    <Skeleton className="h-6 w-12 mx-auto mb-1" />
-                    <div className="text-secondary text-xs">Followers</div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <div className="font-mono font-semibold">{workoutStats?.totalWorkouts || 0}</div>
-                    <div className="text-secondary text-xs">Workouts</div>
-                  </div>
-                  <div>
-                    <div className="font-mono font-semibold">{workoutStats?.following || 0}</div>
-                    <div className="text-secondary text-xs">Following</div>
-                  </div>
-                  <div>
-                    <div className="font-mono font-semibold">{workoutStats?.followers || 0}</div>
-                    <div className="text-secondary text-xs">Followers</div>
-                  </div>
-                </>
-              )}
-            </div>
+            {loadingStats ? (
+              <div className="grid grid-cols-3 text-center mb-4 text-sm">
+                <div>
+                  <Skeleton className="h-6 w-12 mx-auto mb-1" />
+                  <div className="text-secondary text-xs">Workouts</div>
+                </div>
+                <div>
+                  <Skeleton className="h-6 w-12 mx-auto mb-1" />
+                  <div className="text-secondary text-xs">Following</div>
+                </div>
+                <div>
+                  <Skeleton className="h-6 w-12 mx-auto mb-1" />
+                  <div className="text-secondary text-xs">Followers</div>
+                </div>
+              </div>
+            ) : (
+              <UserStatsDisplay 
+                workoutCount={workoutStats?.totalWorkouts || 0}
+                followingCount={workoutStats?.following || 0}
+                followerCount={workoutStats?.followers || 0}
+                className="mb-4 text-sm"
+              />
+            )}
 
             <div className="mb-2 pb-4 border-b border-gray-100">
               <div className="text-sm font-medium mb-1">This Week's Progress</div>

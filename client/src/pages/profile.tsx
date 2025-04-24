@@ -32,6 +32,7 @@ import { ProgressRing } from "@/components/ui/progress-ring";
 import { formatTimeAgo } from "@/lib/utils";
 import PostItem from "@/components/social/PostItem";
 import ProfileEditForm from "@/components/profile/ProfileEditForm";
+import UserStatsDisplay from "@/components/shared/UserStatsDisplay";
 
 export default function Profile() {
   const { user, isLoading: authLoading } = useAuth();
