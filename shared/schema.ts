@@ -176,6 +176,8 @@ export const insertProgramRatingSchema = createInsertSchema(programRatings).pick
   comment: true,
 });
 
+// Note: Relations are disabled for now as we're using direct SQL queries
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
