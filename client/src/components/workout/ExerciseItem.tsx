@@ -72,7 +72,7 @@ export default function ExerciseItem({
           <div className="grid grid-cols-3 gap-2">
             <div>
               <FormLabel className="block text-xs text-secondary mb-1">Set</FormLabel>
-              <div className="text-sm font-mono font-medium text-center">{setIndex + 1}</div>
+              <div className="flex justify-center items-center h-9 bg-gray-100 rounded text-sm font-mono font-medium">{setIndex + 1}</div>
             </div>
             <div>
               <FormLabel className="block text-xs text-secondary mb-1">

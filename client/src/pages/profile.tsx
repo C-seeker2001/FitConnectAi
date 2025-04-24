@@ -51,7 +51,7 @@ export default function Profile() {
     }
   }, [location, user]);
 
-  const { data: profile, isLoading: profileLoading } = useQuery<any>({
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery<any>({
     queryKey: ['/api/users', userId],
     enabled: !!userId,
   });
@@ -132,7 +132,21 @@ export default function Profile() {
     );
   }
 
-  if (!user || !profile) return null;
+  if (!user || !profile) {
+    // If user is logged in but profile couldn't be loaded, show error message
+    if (user && profileError) {
+      return (
+        <div className="text-center py-10">
+          <h2 className="text-xl font-semibold mb-2">Error Loading Profile</h2>
+          <p className="text-secondary mb-4">We couldn't load this profile information.</p>
+          <Button onClick={() => window.location.href = "/"}>
+            Return to Home
+          </Button>
+        </div>
+      );
+    }
+    return null;
+  }
   
   const isCurrentUser = user.id === userId;
 
@@ -254,7 +268,7 @@ export default function Profile() {
                   <Skeleton className="h-40 w-full mt-4" />
                 </Card>
               ))
-            ) : posts?.length > 0 ? (
+            ) : posts && posts.length > 0 ? (
               posts.map((post: any) => <PostItem key={post.id} post={post} />)
             ) : (
               <Card>
