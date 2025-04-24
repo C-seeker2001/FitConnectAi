@@ -53,13 +53,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select()
         .from(follows)
         .where(eq(follows.followerId, userId));
-        
+      
+      // Get posts for feed from user's following list
+      const followingIds = followingList.map(f => f.followingId);
+      console.log('Following IDs for feed:', followingIds);
+      
+      // Get posts from those users
+      let feedPosts = [];
+      if (followingIds.length > 0) {
+        feedPosts = await db
+          .select()
+          .from(posts)
+          .where(inArray(posts.userId, followingIds))
+          .orderBy(desc(posts.createdAt))
+          .limit(10);
+          
+        console.log(`Found ${feedPosts.length} posts for feed`);
+      }
+      
       res.json({
         userId,
         followerCount: followerResult[0]?.count || 0,
         followingCount: followingResult[0]?.count || 0,
         followersList,
-        followingList
+        followingList,
+        feedSample: feedPosts.slice(0, 3) // Return first 3 posts for inspection
       });
     } catch (error) {
       console.error("Error in debug route:", error);
@@ -588,6 +606,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // -------------------- POST ROUTES --------------------
 
+  // Debug feed route
+  app.get("/api/debug/feed/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      // Get users that the current user follows
+      const followingList = await db
+        .select()
+        .from(follows)
+        .where(eq(follows.followerId, userId));
+      
+      const followingIds = followingList.map(f => f.followingId);
+      console.log(`Debug feed - User ${userId} is following:`, followingIds);
+      
+      // Add the user's own ID to include their posts
+      followingIds.push(userId);
+      
+      // If user follows no one and isn't themselves, return empty array
+      if (followingIds.length === 0) {
+        console.log(`User ${userId} is not following anyone. Returning empty feed.`);
+        return res.json({ posts: [] });
+      }
+      
+      // Get posts from those users
+      const feedPosts = await db
+        .select()
+        .from(posts)
+        .where(inArray(posts.userId, followingIds))
+        .orderBy(desc(posts.createdAt));
+      
+      console.log(`Found ${feedPosts.length} posts for feed from ${followingIds.length} users`);
+      console.log('First 3 posts:', feedPosts.slice(0, 3));
+      
+      res.json({
+        userId,
+        followingIds,
+        postsCount: feedPosts.length,
+        posts: feedPosts.slice(0, 5) // Return first 5 posts for inspection
+      });
+    } catch (error) {
+      console.error("Error in debug feed route:", error);
+      res.status(500).json({ message: "Server error", error: String(error) });
+    }
+  });
+
   // Get feed posts (posts from followed users and self)
   app.get("/api/posts", async (req, res) => {
     if (!req.session.userId) {
@@ -595,7 +658,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
+      console.log(`Getting feed posts for user: ${req.session.userId}`);
       const posts = await storage.getFeedPosts(req.session.userId);
+      console.log(`Found ${posts.length} posts for feed`);
       
       // Check if current user has liked each post
       const postsWithLikeStatus = await Promise.all(posts.map(async (post) => {
@@ -605,6 +670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(postsWithLikeStatus);
     } catch (error) {
+      console.error("Error in /api/posts:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
