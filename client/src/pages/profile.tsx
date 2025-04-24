@@ -191,20 +191,12 @@ export default function Profile() {
               <h1 className="text-2xl font-bold mb-1">{profile.username}</h1>
               <p className="text-secondary mb-4">{profile.bio || `@${profile.username.toLowerCase()}`}</p>
               
-              <div className="flex flex-wrap justify-center md:justify-start gap-6 mb-4">
-                <div className="text-center">
-                  <div className="font-mono font-semibold text-lg">{profile.workoutCount}</div>
-                  <div className="text-sm text-secondary">Workouts</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-mono font-semibold text-lg">{profile.followingCount}</div>
-                  <div className="text-sm text-secondary">Following</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-mono font-semibold text-lg">{profile.followerCount}</div>
-                  <div className="text-sm text-secondary">Followers</div>
-                </div>
-              </div>
+              <UserStatsDisplay 
+                workoutCount={profile.workoutCount || 0}
+                followingCount={profile.followingCount || 0}
+                followerCount={profile.followerCount || 0}
+                className="mb-4 text-lg"
+              />
               
               {isCurrentUser ? (
                 <Button variant="outline" size="sm" onClick={() => setShowEditForm(true)}>

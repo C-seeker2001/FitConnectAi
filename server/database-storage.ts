@@ -312,7 +312,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Get workouts for the last 3 months
-    const workouts = await db
+    const workoutsList = await db
       .select()
       .from(workouts)
       .where(and(
@@ -321,7 +321,7 @@ export class DatabaseStorage implements IStorage {
       ));
     
     // Count workouts per month
-    for (const workout of workouts) {
+    for (const workout of workoutsList) {
       const monthKey = format(new Date(workout.createdAt), 'yyyy-MM');
       if (workoutsByMonth[monthKey] !== undefined) {
         workoutsByMonth[monthKey]++;
