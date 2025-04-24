@@ -216,6 +216,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
+  
+  // Update user profile
+  app.patch("/api/users/:id", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Only allow users to update their own profile
+      if (userId !== req.session.userId) {
+        return res.status(403).json({ message: "Not authorized to update this profile" });
+      }
+      
+      const { username, email, bio, weeklyGoal } = req.body;
+      
+      // Check if username is already taken by another user
+      if (username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser && existingUser.id !== userId) {
+          return res.status(400).json({ message: "Username already taken" });
+        }
+      }
+      
+      // Check if email is already taken by another user
+      if (email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser && existingUser.id !== userId) {
+          return res.status(400).json({ message: "Email already registered" });
+        }
+      }
+      
+      // Update user profile
+      const updatedUser = await storage.updateUser(userId, {
+        username,
+        email,
+        bio,
+        weeklyGoal: weeklyGoal ? parseInt(weeklyGoal) : undefined,
+      });
+      
+      // Don't send password to client
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
 
   // Get user activity data
   app.get("/api/users/:id/activity", async (req, res) => {
