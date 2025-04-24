@@ -107,43 +107,33 @@ export default function LeftSidebar() {
 
         <ul className="space-y-2 mt-4">
           <li>
-            <Link href="/workouts">
-              <a className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
-                <Dumbbell className="h-5 w-5 mr-3" />
-                <span>My Workouts</span>
-              </a>
+            <Link href="/workouts" className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
+              <Dumbbell className="h-5 w-5 mr-3" />
+              <span>My Workouts</span>
             </Link>
           </li>
           <li>
-            <Link href="/progress">
-              <a className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
-                <LineChart className="h-5 w-5 mr-3" />
-                <span>Progress</span>
-              </a>
+            <Link href="/progress" className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
+              <LineChart className="h-5 w-5 mr-3" />
+              <span>Progress</span>
             </Link>
           </li>
           <li>
-            <Link href="/friends">
-              <a className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
-                <Users className="h-5 w-5 mr-3" />
-                <span>Friends</span>
-              </a>
+            <Link href="/discover" className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
+              <Users className="h-5 w-5 mr-3" />
+              <span>Discover</span>
             </Link>
           </li>
           <li>
-            <Link href="/saved">
-              <a className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
-                <Bookmark className="h-5 w-5 mr-3" />
-                <span>Saved Programs</span>
-              </a>
+            <Link href="/programs" className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
+              <Bookmark className="h-5 w-5 mr-3" />
+              <span>Saved Programs</span>
             </Link>
           </li>
           <li>
-            <Link href="/settings">
-              <a className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
-                <Settings className="h-5 w-5 mr-3" />
-                <span>Settings</span>
-              </a>
+            <Link href="/settings" className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
+              <Settings className="h-5 w-5 mr-3" />
+              <span>Settings</span>
             </Link>
           </li>
         </ul>

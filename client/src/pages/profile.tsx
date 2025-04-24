@@ -34,7 +34,7 @@ import PostItem from "@/components/social/PostItem";
 
 export default function Profile() {
   const { user, isLoading: authLoading } = useAuth();
-  const [location, params] = useLocation();
+  const [location, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [userId, setUserId] = useState<number | null>(null);
@@ -51,17 +51,17 @@ export default function Profile() {
     }
   }, [location, user]);
 
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile, isLoading: profileLoading } = useQuery<any>({
     queryKey: ['/api/users', userId],
     enabled: !!userId,
   });
 
-  const { data: activityData, isLoading: activityLoading } = useQuery({
+  const { data: activityData, isLoading: activityLoading } = useQuery<any[]>({
     queryKey: ['/api/users', userId, 'activity'],
     enabled: !!userId,
   });
 
-  const { data: posts, isLoading: postsLoading } = useQuery({
+  const { data: posts, isLoading: postsLoading } = useQuery<any[]>({
     queryKey: ['/api/users', userId, 'posts'],
     enabled: !!userId,
   });
