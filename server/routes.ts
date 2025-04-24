@@ -3,8 +3,10 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
 import { z } from "zod";
-import { insertUserSchema, insertWorkoutSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
+import { insertUserSchema, insertWorkoutSchema, insertPostSchema, insertCommentSchema, follows } from "@shared/schema";
 import MemoryStore from "memorystore";
+import { db } from "./db";
+import { eq, count } from "drizzle-orm";
 
 const SessionStore = MemoryStore(session);
 
@@ -24,6 +26,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // API Routes
   // -------------------- AUTH ROUTES --------------------
+
+  // Debug test route for follow counts
+  app.get("/api/debug/follows/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      // Direct database queries to check follow data
+      const followerResult = await db
+        .select({ count: count() })
+        .from(follows)
+        .where(eq(follows.followingId, userId));
+        
+      const followingResult = await db
+        .select({ count: count() })
+        .from(follows)
+        .where(eq(follows.followerId, userId));
+      
+      // Check the actual follow records
+      const followersList = await db
+        .select()
+        .from(follows)
+        .where(eq(follows.followingId, userId));
+      
+      const followingList = await db
+        .select()
+        .from(follows)
+        .where(eq(follows.followerId, userId));
+        
+      res.json({
+        userId,
+        followerCount: followerResult[0]?.count || 0,
+        followingCount: followingResult[0]?.count || 0,
+        followersList,
+        followingList
+      });
+    } catch (error) {
+      console.error("Error in debug route:", error);
+      res.status(500).json({ message: "Server error", error: String(error) });
+    }
+  });
 
   // Get current authenticated user
   app.get("/api/auth/me", async (req, res) => {
