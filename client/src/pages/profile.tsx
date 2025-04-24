@@ -31,6 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProgressRing } from "@/components/ui/progress-ring";
 import { formatTimeAgo } from "@/lib/utils";
 import PostItem from "@/components/social/PostItem";
+import ProfileEditForm from "@/components/profile/ProfileEditForm";
 
 export default function Profile() {
   const { user, isLoading: authLoading } = useAuth();
@@ -38,6 +39,7 @@ export default function Profile() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [userId, setUserId] = useState<number | null>(null);
+  const [showEditForm, setShowEditForm] = useState(false);
   
   useEffect(() => {
     // If URL has a userId parameter, use that; otherwise use the logged-in user's ID
@@ -180,7 +182,7 @@ export default function Profile() {
               </div>
               
               {isCurrentUser ? (
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setShowEditForm(true)}>
                   <Settings className="h-4 w-4 mr-2" />
                   Edit Profile
                 </Button>
@@ -376,6 +378,15 @@ export default function Profile() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Profile Dialog */}
+      {profile && (
+        <ProfileEditForm 
+          open={showEditForm} 
+          onClose={() => setShowEditForm(false)} 
+          profile={profile}
+        />
+      )}
     </div>
   );
 }
