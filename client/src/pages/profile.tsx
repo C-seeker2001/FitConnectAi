@@ -44,14 +44,25 @@ export default function Profile() {
   useEffect(() => {
     // If URL has a userId parameter, use that; otherwise use the logged-in user's ID
     if (location.includes('/profile/')) {
-      const id = parseInt(location.split('/profile/')[1]);
-      if (!isNaN(id)) {
-        setUserId(id);
+      const pathParts = location.split('/profile/');
+      if (pathParts.length > 1 && pathParts[1]) {
+        const id = parseInt(pathParts[1]);
+        if (!isNaN(id)) {
+          setUserId(id);
+          return;
+        }
       }
-    } else if (user) {
-      setUserId(user.id);
     }
-  }, [location, user]);
+    
+    // Default to current user's profile if no valid ID in URL
+    if (user) {
+      setUserId(user.id);
+      // If we're at /profile with no ID, redirect to /profile/[userId]
+      if (location === '/profile' && user.id) {
+        navigate(`/profile/${user.id}`);
+      }
+    }
+  }, [location, user, navigate]);
 
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery<any>({
     queryKey: ['/api/users', userId],

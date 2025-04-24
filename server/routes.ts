@@ -139,24 +139,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const userId = parseInt(req.params.id);
+      console.log(`Loading profile for user ID: ${userId}`);
+      
       const user = await storage.getUser(userId);
       
       if (!user) {
+        console.log(`User ${userId} not found`);
         return res.status(404).json({ message: "User not found" });
       }
 
       // Get stats for the user
+      console.log(`Found user: ${user.username}, getting stats...`);
+      
       const workoutCount = await storage.getUserWorkoutCount(userId);
+      console.log(`Workout count: ${workoutCount}`);
+      
       const followerCount = await storage.getUserFollowerCount(userId);
+      console.log(`Follower count: ${followerCount}`);
+      
       const followingCount = await storage.getUserFollowingCount(userId);
+      console.log(`Following count: ${followingCount}`);
+      
       const isFollowing = await storage.isFollowing(req.session.userId, userId);
+      console.log(`Is current user following this user? ${isFollowing}`);
+      
       const currentStreak = await storage.getUserWorkoutStreak(userId);
       const weeklyWorkouts = await storage.getUserWeeklyWorkoutCount(userId);
       
       // Don't send password to client
       const { password, ...userWithoutPassword } = user;
       
-      res.json({
+      const responseData = {
         ...userWithoutPassword,
         workoutCount,
         followerCount,
@@ -165,8 +178,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currentStreak,
         weeklyWorkouts,
         weeklyGoal: user.weeklyGoal || 4,
-      });
+      };
+      
+      console.log(`Sending profile response for ${user.username}:`, responseData);
+      res.json(responseData);
     } catch (error) {
+      console.error("Error in /api/users/:id:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
