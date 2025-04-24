@@ -28,7 +28,7 @@ import {
 import type { Set as SetModel } from "@shared/schema";
 import { IStorage } from "./storage";
 import { db } from "./db";
-import { eq, and, desc, sql, gte, lte, count } from "drizzle-orm";
+import { eq, and, desc, sql, gte, lte, count, inArray } from "drizzle-orm";
 import { getDay, startOfWeek, startOfMonth, addDays, addMonths, subMonths, format } from "date-fns";
 
 export class DatabaseStorage implements IStorage {
@@ -700,28 +700,17 @@ export class DatabaseStorage implements IStorage {
     const followingIds = followingList.map(f => f.followingId);
     followingIds.push(userId); // Include user's own posts
     
-    // If no posts should be returned, return empty array
+    // If we have no posts to return, return empty array
     if (followingIds.length === 0) {
       return [];
     }
     
-    // Get posts from those users
-    let postsList;
-    if (followingIds.length === 1) {
-      // Just the user's own posts
-      postsList = await db
-        .select()
-        .from(posts)
-        .where(eq(posts.userId, followingIds[0]))
-        .orderBy(desc(posts.createdAt));
-    } else {
-      // Multiple users' posts
-      postsList = await db
-        .select()
-        .from(posts)
-        .where(sql`${posts.userId} = ANY(ARRAY[${followingIds.join(',')}])`)
-        .orderBy(desc(posts.createdAt));
-    }
+    // Get posts from those users - use inArray for compatibility
+    const postsList = await db
+      .select()
+      .from(posts)
+      .where(inArray(posts.userId, followingIds))
+      .orderBy(desc(posts.createdAt));
     
     // Enrich posts with user, workout, and count data
     return Promise.all(postsList.map(async post => {
