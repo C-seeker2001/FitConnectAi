@@ -890,7 +890,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
-
+  
   // Get trending programs
   app.get("/api/programs/trending", async (req, res) => {
     if (!req.session.userId) {
@@ -927,6 +927,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
       
       res.json(programs);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Get a specific program by ID
+  app.get("/api/programs/:id", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const programId = parseInt(req.params.id);
+      
+      // In a real app, this would fetch from database
+      // For now, use the same sample data and filter
+      const programs = [
+        {
+          id: 1,
+          name: "12-Week Strength Builder",
+          author: "Coach Mike",
+          type: "strength",
+          description: "Complete strength program focused on compound movements to build overall strength and muscle.",
+          rating: 4.5,
+          ratingCount: 432,
+        },
+        {
+          id: 2,
+          name: "Endurance Challenge",
+          author: "FitRunner",
+          type: "cardio",
+          description: "Progressive cardio program designed to improve endurance and cardiovascular health.",
+          rating: 4.0,
+          ratingCount: 289,
+        },
+        {
+          id: 3,
+          name: "Full Body Transformation",
+          author: "Transform Fitness",
+          type: "mixed",
+          description: "Comprehensive program combining strength training, cardio, and nutrition for total body transformation.",
+          rating: 5.0,
+          ratingCount: 516,
+        },
+        {
+          id: 4,
+          name: "Beginner's Guide to Lifting",
+          author: "StartStrong",
+          type: "strength",
+          description: "Perfect for beginners looking to learn proper form and build a foundation of strength.",
+          rating: 4.7,
+          ratingCount: 352,
+        },
+        {
+          id: 5,
+          name: "HIIT Fat Burner",
+          author: "BurnItUp",
+          type: "cardio",
+          description: "High intensity interval training program focused on maximizing calorie burn and fat loss.",
+          rating: 4.2,
+          ratingCount: 178,
+        },
+        {
+          id: 6,
+          name: "5x5 Progressive Overload",
+          author: "GainTrain",
+          type: "strength",
+          description: "Classic 5x5 workout structure with progressive overload for consistent strength gains.",
+          rating: 4.8,
+          ratingCount: 403,
+        },
+      ];
+      
+      const program = programs.find(p => p.id === programId);
+      
+      if (!program) {
+        return res.status(404).json({ message: "Program not found" });
+      }
+      
+      res.json(program);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
     }
