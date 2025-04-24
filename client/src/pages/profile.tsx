@@ -380,9 +380,9 @@ export default function Profile() {
       </Tabs>
 
       {/* Edit Profile Dialog */}
-      {profile && (
+      {showEditForm && profile && profile.username && (
         <ProfileEditForm 
-          open={showEditForm} 
+          open={true} 
           onClose={() => setShowEditForm(false)} 
           profile={profile}
         />
