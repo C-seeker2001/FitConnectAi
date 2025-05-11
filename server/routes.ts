@@ -225,6 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId || isNaN(userId)) {
         return res.status(400).json({ message: "Invalid user ID" });
       }
+      req.session.userId = userId; // Set session user ID for this request
 
       console.log(`Profile request - Loading profile for user ID: ${userId}`);
 
@@ -396,6 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = parseInt(req.params.id);
       console.log(`Getting posts for user ID: ${userId}`);
+      req.session.userId = userId; // Set session user ID for this request
 
       const userPosts = await storage.getUserPosts(userId);
 
@@ -423,9 +425,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get all workouts for current user
   app.get("/api/workouts", async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
 
     try {
       const filter = req.query.filter as string || "all";
