@@ -128,18 +128,13 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth?mode=login');
-      return;
-    }
-    
-    // If URL has no userId parameter and user is logged in, redirect to their profile
+    // If URL has no userId parameter, redirect to their profile
     if (user && location === '/profile') {
       navigate(`/profile/${user.id}`);
     }
-  }, [user, authLoading, navigate, location]);
+  }, [user, navigate, location]);
 
-  if (authLoading || profileLoading) {
+  if (profileLoading) {
     return (
       <div className="flex justify-center items-center py-10">
         <Loader className="h-8 w-8 animate-spin text-accent" />
@@ -147,20 +142,16 @@ export default function Profile() {
     );
   }
 
-  if (!user || !profile || !profile.username) {
-    // If user is logged in but profile couldn't be loaded, show error message
-    if (user && (profileError || !profile || !profile.username)) {
-      return (
-        <div className="text-center py-10">
-          <h2 className="text-xl font-semibold mb-2">Error Loading Profile</h2>
-          <p className="text-secondary mb-4">We couldn't load this profile information.</p>
-          <Button onClick={() => window.location.href = "/"}>
-            Return to Home
-          </Button>
-        </div>
-      );
-    }
-    return null;
+  if (!profile || !profile.username) {
+    return (
+      <div className="text-center py-10">
+        <h2 className="text-xl font-semibold mb-2">Error Loading Profile</h2>
+        <p className="text-secondary mb-4">We couldn't load this profile information.</p>
+        <Button onClick={() => window.location.href = "/"}>
+          Return to Home
+        </Button>
+      </div>
+    );
   }
   
   // Ensure all required profile data is available
