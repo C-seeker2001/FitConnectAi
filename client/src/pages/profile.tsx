@@ -68,6 +68,12 @@ export default function Profile() {
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery<any>({
     queryKey: ['/api/users', userId],
     enabled: !!userId,
+    onSuccess: (data) => {
+      console.log('Profile data loaded successfully:', data);
+    },
+    onError: (error) => {
+      console.error('Error loading profile data:', error);
+    }
   });
 
   const { data: activityData, isLoading: activityLoading } = useQuery<any[]>({
