@@ -17,15 +17,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       cookie: { 
         maxAge: 86400000, // 24 hours
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax'
+        secure: false, // Set to false to work in development
+        sameSite: 'lax',
+        path: '/'
       },
       store: new SessionStore({
         checkPeriod: 86400000, // prune expired entries every 24h
       }),
-      resave: false,
-      saveUninitialized: false,
+      resave: true,
+      saveUninitialized: true,
       secret: process.env.SESSION_SECRET || "fitsocial-secret-key",
+      name: 'connect.sid'
     })
   );
 
