@@ -397,11 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.params.id);
       console.log(`Getting posts for user ID: ${userId}`);
 
-      const posts = await db
-        .select()
-        .from(posts)
-        .where(eq(posts.userId, userId))
-        .orderBy(desc(posts.createdAt));
+      const userPosts = await storage.getUserPosts(userId);
 
       console.log(`Found ${posts.length} posts for user ${userId}`);
 
