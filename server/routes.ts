@@ -764,15 +764,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const posts = await storage.getFeedPosts(req.session.userId);
       console.log(`Found ${posts.length} posts for feed`);
 
-      // Check if current user has liked each post
+      // Check if current user has liked each post and get comments
       const postsWithLikeStatus = await Promise.all(posts.map(async (post) => {
         const liked = req.session.userId ? await storage.hasUserLikedPost(req.session.userId, post.id) : false;
-        const comments = await db
+        const postComments = await db
           .select()
           .from(comments)
           .where(eq(comments.postId, post.id))
           .orderBy(desc(comments.createdAt));
-        return { ...post, liked, comments };
+        return { ...post, liked, comments: postComments };
       }));
 
       console.log(`Sending ${postsWithLikeStatus.length} posts with like status`);
