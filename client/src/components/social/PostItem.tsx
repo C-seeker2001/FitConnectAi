@@ -221,6 +221,7 @@ export default function PostItem({ post }: PostProps) {
                 No comments yet. Be the first to comment!
               </div>
             )}
+            )}
           </div>
         </div>
       )}
