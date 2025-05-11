@@ -211,9 +211,9 @@ export default function PostItem({ post }: PostProps) {
           <CommentForm postId={post.id} />
           
           {/* Comments */}
-          {post.commentCount > 0 && (
+          {post.comments && post.comments.length > 0 && (
             <div className="mt-3 space-y-3">
-              {post.comments?.map((comment: any) => (
+              {post.comments.map((comment: any) => (
                 <CommentItem key={comment.id} comment={comment} postId={post.id} />
               ))}
             </div>
