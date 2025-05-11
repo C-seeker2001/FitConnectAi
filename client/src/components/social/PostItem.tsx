@@ -211,13 +211,16 @@ export default function PostItem({ post }: PostProps) {
           <CommentForm postId={post.id} />
           
           {/* Comments */}
-          {post.comments?.length > 0 && (
-            <div className="mt-3 space-y-3">
-              {post.comments.map((comment: any) => (
-                <CommentItem key={comment.id} comment={comment} postId={post.id} />
-              ))}
-            </div>
-          )}
+          <div className="mt-3 space-y-3">
+            {post.comments && post.comments.map((comment: any) => (
+              <CommentItem key={comment.id} comment={comment} postId={post.id} />
+            ))}
+            {(!post.comments || post.comments.length === 0) && (
+              <div className="text-center text-sm text-secondary">
+                No comments yet. Be the first to comment!
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
