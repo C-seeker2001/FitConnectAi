@@ -62,7 +62,11 @@ export default function Profile() {
 
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery<any>({
     queryKey: ['/api/users', userId],
-    queryFn: () => apiRequest('GET', `/api/users/${userId}`),
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/users/${userId}`);
+      const data = await response.json();
+      return data;
+    },
     enabled: userId !== null
   });
 
