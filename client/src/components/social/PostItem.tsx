@@ -80,7 +80,13 @@ export default function PostItem({ post }: PostProps) {
   };
 
   const canDelete = user?.id === post.user.id;
-  const toggleComments = () => setShowComments(!showComments);
+  const toggleComments = () => {
+    setShowComments(!showComments);
+    if (!showComments) {
+      // Invalidate query to refresh comments
+      queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
