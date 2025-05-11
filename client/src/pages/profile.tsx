@@ -41,7 +41,7 @@ export default function Profile() {
   const queryClient = useQueryClient();
   const [userId, setUserId] = useState<number | null>(null);
   const [showEditForm, setShowEditForm] = useState(false);
-  
+
   useEffect(() => {
     // Get ID from URL
     let id = null;
@@ -65,11 +65,13 @@ export default function Profile() {
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/users/${userId}`);
       const userData = await response.json();
-      
+
       // Get workouts for this user
-      const workoutsResponse = await apiRequest('GET', `/api/workouts?filter=user&userId=${userId}`);
+      const workoutsResponse = await apiRequest('GET', `/api/workouts?userId=${userId}`);
       const workouts = await workoutsResponse.json();
-      
+
+      console.log("WORKOUTS", workouts)
+
       return {
         ...userData,
         workouts
@@ -170,7 +172,7 @@ export default function Profile() {
       </div>
     );
   }
-  
+
   // Ensure all required profile data is available
   if (!profile.username || !profile.id) {
     console.error("Profile data incomplete:", profile);
@@ -184,7 +186,7 @@ export default function Profile() {
       </div>
     );
   }
-  
+
   const isCurrentUser = user.id === userId;
 
   return (
@@ -196,18 +198,18 @@ export default function Profile() {
               <AvatarImage src={profile.avatar} alt={profile.username} />
               <AvatarFallback className="text-2xl">{profile.username.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
-            
+
             <div className="flex-1 text-center md:text-left">
               <h1 className="text-2xl font-bold mb-1">{profile.username}</h1>
               <p className="text-secondary mb-4">{profile.bio || `@${profile.username.toLowerCase()}`}</p>
-              
+
               <UserStatsDisplay 
                 workoutCount={profile.workoutCount || 0}
                 followingCount={profile.followingCount || 0}
                 followerCount={profile.followerCount || 0}
                 className="mb-4 text-lg"
               />
-              
+
               {isCurrentUser ? (
                 <Button variant="outline" size="sm" onClick={() => setShowEditForm(true)}>
                   <Settings className="h-4 w-4 mr-2" />
@@ -234,7 +236,7 @@ export default function Profile() {
                 </Button>
               )}
             </div>
-            
+
             <div className="hidden md:block">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-center mb-3">
