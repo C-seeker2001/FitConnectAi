@@ -64,8 +64,16 @@ export default function Profile() {
     queryKey: ['/api/users', userId],
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/users/${userId}`);
-      const data = await response.json();
-      return data;
+      const userData = await response.json();
+      
+      // Get workouts for this user
+      const workoutsResponse = await apiRequest('GET', `/api/workouts?filter=user&userId=${userId}`);
+      const workouts = await workoutsResponse.json();
+      
+      return {
+        ...userData,
+        workouts
+      };
     },
     enabled: userId !== null
   });

@@ -424,13 +424,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const filter = req.query.filter as string || "all";
       const dateStr = req.query.date as string || null;
+      const targetUserId = parseInt(req.query.userId as string) || req.session.userId;
       
       let date: Date | null = null;
       if (dateStr) {
         date = new Date(dateStr);
       }
       
-      const workouts = await storage.getUserWorkouts(req.session.userId, filter, date);
+      const workouts = await storage.getUserWorkouts(targetUserId, filter, date);
       res.json(workouts);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
