@@ -220,16 +220,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get specific user
   app.get("/api/users/:id", async (req, res) => {
-    console.log("Profile request - Session:", req.session);
-    
-    if (!req.session.userId) {
-      console.log("Profile request - Not authenticated");
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
     try {
       const userId = parseInt(req.params.id);
-      const currentUserId = req.session.userId;
+      const currentUserId = req.session.userId || null; // Optional auth
       
       console.log(`Profile request - Loading profile for user ID: ${userId}, requested by user ID: ${currentUserId}`);
       

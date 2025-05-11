@@ -43,13 +43,7 @@ export default function Profile() {
   const [showEditForm, setShowEditForm] = useState(false);
   
   useEffect(() => {
-    // If not authenticated, redirect to login
-    if (!authLoading && !user) {
-      navigate('/auth?mode=login');
-      return;
-    }
-
-    // Get ID from URL or use current user's ID
+    // Get ID from URL or use current user's ID if available
     let id = null;
     if (location.includes('/profile/')) {
       const pathParts = location.split('/profile/');
