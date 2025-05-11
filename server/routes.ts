@@ -14,7 +14,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Configure session middleware
   app.use(
     session({
-      cookie: { maxAge: 86400000 }, // 24 hours
+      cookie: { 
+        maxAge: 86400000, // 24 hours
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+      },
       store: new SessionStore({
         checkPeriod: 86400000, // prune expired entries every 24h
       }),
@@ -87,21 +92,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get current authenticated user
   app.get("/api/auth/me", async (req, res) => {
+    console.log("Auth check - Session:", req.session);
+    
     if (!req.session.userId) {
+      console.log("Auth check failed - No userId in session");
       return res.status(401).json({ message: "Not authenticated" });
     }
 
     try {
-      const user = await storage.getUser(req.session.userId);
+      const userId = req.session.userId;
+      console.log(`Auth check - Fetching user with ID: ${userId}`);
+      
+      const user = await storage.getUser(userId);
       if (!user) {
+        console.log(`Auth check failed - User with ID ${userId} not found in database`);
         req.session.destroy(() => {});
         return res.status(401).json({ message: "User not found" });
       }
 
       // Don't send password to client
       const { password, ...userWithoutPassword } = user;
+      console.log(`Auth check successful - User: ${user.username}`);
       res.json(userWithoutPassword);
     } catch (error) {
+      console.error("Auth check error:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -110,17 +124,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { username, password } = req.body;
+      console.log(`Login attempt for username: ${username}`);
 
       const user = await storage.getUserByUsername(username);
-      if (!user || user.password !== password) {
+      if (!user) {
+        console.log(`User not found: ${username}`);
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
+      
+      if (user.password !== password) {
+        console.log(`Password mismatch for user: ${username}`);
         return res.status(401).json({ message: "Invalid username or password" });
       }
 
+      // Set the session
       req.session.userId = user.id;
+      console.log(`User logged in successfully: ${username} (ID: ${user.id})`);
+      
       // Don't send password to client
       const { password: _, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -193,18 +218,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get specific user
   app.get("/api/users/:id", async (req, res) => {
+    console.log("Profile request - Session:", req.session);
+    
     if (!req.session.userId) {
+      console.log("Profile request - Not authenticated");
       return res.status(401).json({ message: "Not authenticated" });
     }
 
     try {
       const userId = parseInt(req.params.id);
-      console.log(`Loading profile for user ID: ${userId}`);
+      const currentUserId = req.session.userId;
+      
+      console.log(`Profile request - Loading profile for user ID: ${userId}, requested by user ID: ${currentUserId}`);
       
       const user = await storage.getUser(userId);
       
       if (!user) {
-        console.log(`User ${userId} not found`);
+        console.log(`Profile request - User ${userId} not found`);
         return res.status(404).json({ message: "User not found" });
       }
 
