@@ -135,8 +135,14 @@ export default function Profile() {
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth?mode=login');
+      return;
     }
-  }, [user, authLoading, navigate]);
+    
+    // If URL has no userId parameter and user is logged in, redirect to their profile
+    if (user && location === '/profile') {
+      navigate(`/profile/${user.id}`);
+    }
+  }, [user, authLoading, navigate, location]);
 
   if (authLoading || profileLoading) {
     return (
