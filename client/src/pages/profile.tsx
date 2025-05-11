@@ -77,7 +77,10 @@ export default function Profile() {
 
   const { data: posts, isLoading: postsLoading } = useQuery<any[]>({
     queryKey: ['/api/users', userId, 'posts'],
-    queryFn: () => apiRequest('GET', `/api/users/${userId}/posts`),
+    queryFn: async () => {
+      const response = await fetch(`/api/users/${userId}/posts`);
+      return response.json();
+    },
     enabled: userId !== null
   });
 
