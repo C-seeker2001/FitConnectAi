@@ -43,27 +43,34 @@ export default function Profile() {
   const [showEditForm, setShowEditForm] = useState(false);
   
   useEffect(() => {
-    // If URL has a userId parameter, use that; otherwise use the logged-in user's ID
+    // If not authenticated, redirect to login
+    if (!authLoading && !user) {
+      navigate('/auth?mode=login');
+      return;
+    }
+
+    // Get ID from URL or use current user's ID
+    let id = null;
     if (location.includes('/profile/')) {
       const pathParts = location.split('/profile/');
       if (pathParts.length > 1 && pathParts[1]) {
-        const id = parseInt(pathParts[1]);
-        if (!isNaN(id)) {
-          setUserId(id);
-          return;
-        }
+        id = parseInt(pathParts[1]);
       }
     }
-    
-    // Default to current user's profile if no valid ID in URL
-    if (user) {
-      setUserId(user.id);
-      // If we're at /profile with no ID, redirect to /profile/[userId]
-      if (location === '/profile' && user.id) {
+
+    // If no valid ID in URL and user is logged in, use their ID
+    if ((!id || isNaN(id)) && user) {
+      id = user.id;
+      if (location === '/profile') {
         navigate(`/profile/${user.id}`);
+        return;
       }
     }
-  }, [location, user, navigate]);
+
+    if (id && !isNaN(id)) {
+      setUserId(id);
+    }
+  }, [location, user, authLoading, navigate]);
 
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery<any>({
     queryKey: ['/api/users', userId],
