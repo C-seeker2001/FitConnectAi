@@ -52,10 +52,10 @@ export class DatabaseStorage implements IStorage {
     if (!search) {
       return db.select().from(users);
     }
-    
+
     const searchLower = search.toLowerCase();
     const results = await db.select().from(users);
-    
+
     // Filter in memory for now - in a production app this would use SQL LIKE operators
     return results.filter(user => 
       user.username.toLowerCase().includes(searchLower) ||
@@ -76,7 +76,7 @@ export class DatabaseStorage implements IStorage {
         createdAt: now,
       })
       .returning();
-    
+
     return user;
   }
 
@@ -86,11 +86,11 @@ export class DatabaseStorage implements IStorage {
       .set(userData)
       .where(eq(users.id, id))
       .returning();
-    
+
     if (!updatedUser) {
       throw new Error("User not found");
     }
-    
+
     return updatedUser;
   }
 
@@ -101,12 +101,12 @@ export class DatabaseStorage implements IStorage {
       .from(workouts)
       .where(eq(workouts.userId, userId))
       .orderBy(desc(workouts.createdAt));
-    
+
     if (date) {
       // If date is provided, filter by that specific date (matching by day)
       const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
-      
+
       workoutQuery = db
         .select()
         .from(workouts)
@@ -117,9 +117,9 @@ export class DatabaseStorage implements IStorage {
         ))
         .orderBy(desc(workouts.createdAt));
     }
-    
+
     const workoutsList = await workoutQuery;
-    
+
     // Filter by type if needed (filter by name as a simple example)
     let filteredWorkouts = workoutsList;
     if (filter !== 'all') {
@@ -127,39 +127,39 @@ export class DatabaseStorage implements IStorage {
         workout.name.toLowerCase().includes(filter.toLowerCase())
       );
     }
-    
+
     // Enrich workout data
     return Promise.all(filteredWorkouts.map(async (workout) => {
       const exercisesList = await db
         .select()
         .from(exercises)
         .where(eq(exercises.workoutId, workout.id));
-      
+
       // Calculate stats
       let totalVolume = 0;
       let allExerciseNames: string[] = [];
-      
+
       for (const exercise of exercisesList) {
         allExerciseNames.push(exercise.name);
-        
+
         const setsList = await db
           .select()
           .from(sets)
           .where(eq(sets.exerciseId, exercise.id));
-        
+
         for (const set of setsList) {
           if (set.weight && set.reps) {
             totalVolume += set.weight * set.reps;
           }
         }
       }
-      
+
       // Format duration as 1h 23m or 45m
       let duration = "";
       if (workout.endTime) {
         const durationMs = new Date(workout.endTime).getTime() - new Date(workout.startTime).getTime();
         const minutes = Math.floor(durationMs / (1000 * 60));
-        
+
         if (minutes < 60) {
           duration = `${minutes}m`;
         } else {
@@ -170,7 +170,7 @@ export class DatabaseStorage implements IStorage {
       } else {
         duration = "In progress";
       }
-      
+
       return {
         ...workout,
         duration,
@@ -186,27 +186,27 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(workouts)
       .where(eq(workouts.id, id));
-    
+
     if (!workout) return undefined;
-    
+
     const exercisesList = await db
       .select()
       .from(exercises)
       .where(eq(exercises.workoutId, id));
-    
+
     // Enrich each exercise with its sets
     const enrichedExercises = await Promise.all(exercisesList.map(async (exercise) => {
       const setsList = await db
         .select()
         .from(sets)
         .where(eq(sets.exerciseId, exercise.id));
-      
+
       return {
         ...exercise,
         sets: setsList,
       };
     }));
-    
+
     return {
       ...workout,
       exercises: enrichedExercises,
@@ -225,7 +225,7 @@ export class DatabaseStorage implements IStorage {
         notes: null,
       })
       .returning();
-    
+
     return workout;
   }
 
@@ -235,11 +235,11 @@ export class DatabaseStorage implements IStorage {
       .set(workoutData)
       .where(eq(workouts.id, id))
       .returning();
-    
+
     if (!updatedWorkout) {
       throw new Error("Workout not found");
     }
-    
+
     return updatedWorkout;
   }
 
@@ -249,27 +249,27 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(exercises)
       .where(eq(exercises.workoutId, id));
-    
+
     for (const exercise of exercisesList) {
       await db
         .delete(sets)
         .where(eq(sets.exerciseId, exercise.id));
     }
-    
+
     await db
       .delete(exercises)
       .where(eq(exercises.workoutId, id));
-    
+
     // Delete related posts
     await db
       .delete(posts)
       .where(eq(posts.workoutId, id));
-    
+
     // Delete the workout
     const result = await db
       .delete(workouts)
       .where(eq(workouts.id, id));
-    
+
     return result.rowCount > 0;
   }
 
@@ -278,14 +278,14 @@ export class DatabaseStorage implements IStorage {
       .select({ count: count() })
       .from(workouts)
       .where(eq(workouts.userId, userId));
-    
+
     return result[0]?.count || 0;
   }
 
   async getUserWeeklyWorkoutCount(userId: number): Promise<number> {
     const today = new Date();
     const startOfWeekDate = startOfWeek(today, { weekStartsOn: 1 }); // Week starts on Monday
-    
+
     const result = await db
       .select()
       .from(workouts)
@@ -293,16 +293,16 @@ export class DatabaseStorage implements IStorage {
         eq(workouts.userId, userId),
         gte(workouts.createdAt, startOfWeekDate)
       ));
-    
+
     return result.length;
   }
 
   async getUserMonthlyWorkoutAverage(userId: number): Promise<number> {
     const today = new Date();
     const threeMonthsAgo = subMonths(today, 3);
-    
+
     const workoutsByMonth: { [key: string]: number } = {};
-    
+
     // Initialize months
     let currentMonth = threeMonthsAgo;
     while (currentMonth <= today) {
@@ -310,7 +310,7 @@ export class DatabaseStorage implements IStorage {
       workoutsByMonth[monthKey] = 0;
       currentMonth = addMonths(currentMonth, 1);
     }
-    
+
     // Get workouts for the last 3 months
     const workoutsList = await db
       .select()
@@ -319,7 +319,7 @@ export class DatabaseStorage implements IStorage {
         eq(workouts.userId, userId),
         gte(workouts.createdAt, threeMonthsAgo)
       ));
-    
+
     // Count workouts per month
     for (const workout of workoutsList) {
       const monthKey = format(new Date(workout.createdAt), 'yyyy-MM');
@@ -327,7 +327,7 @@ export class DatabaseStorage implements IStorage {
         workoutsByMonth[monthKey]++;
       }
     }
-    
+
     // Calculate average
     const months = Object.values(workoutsByMonth);
     return months.reduce((sum, count) => sum + count, 0) / months.length;
@@ -341,40 +341,40 @@ export class DatabaseStorage implements IStorage {
       .from(workouts)
       .where(eq(workouts.userId, userId))
       .orderBy(desc(workouts.createdAt));
-    
+
     if (allWorkouts.length === 0) return 0;
-    
+
     // Get dates of all workouts
     const workoutDates = allWorkouts.map(w => {
       const date = new Date(w.createdAt);
       return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
     });
-    
+
     // Remove duplicate dates (multiple workouts on same day)
     const uniqueDates = [...new Set(workoutDates)].sort((a, b) => b - a);
-    
+
     // Check if the most recent workout was today or yesterday
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayTime = today.getTime();
-    
+
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayTime = yesterday.getTime();
-    
+
     // If the most recent workout wasn't today or yesterday, streak is 0
     if (uniqueDates[0] !== todayTime && uniqueDates[0] !== yesterdayTime) {
       return 0;
     }
-    
+
     // Calculate streak by checking consecutive days
     let streak = 1;
     let currentDate = uniqueDates[0] === todayTime ? yesterday : new Date(yesterday);
     currentDate.setDate(currentDate.getDate() - 1);
-    
+
     for (let i = 1; i < uniqueDates.length; i++) {
       const workoutDate = new Date(uniqueDates[i]);
-      
+
       if (workoutDate.getTime() === currentDate.getTime()) {
         streak++;
         currentDate.setDate(currentDate.getDate() - 1);
@@ -387,14 +387,14 @@ export class DatabaseStorage implements IStorage {
         break;
       }
     }
-    
+
     return streak;
   }
 
   async getUserWorkoutFrequency(userId: number): Promise<any[]> {
     const today = new Date();
     const sixMonthsAgo = subMonths(today, 6);
-    
+
     // Get workouts for the last 6 months
     const workoutsList = await db
       .select()
@@ -403,15 +403,15 @@ export class DatabaseStorage implements IStorage {
         eq(workouts.userId, userId),
         gte(workouts.createdAt, sixMonthsAgo)
       ));
-    
+
     // Group workouts by day of week
     const dayCount = [0, 0, 0, 0, 0, 0, 0]; // Sun, Mon, ..., Sat
-    
+
     for (const workout of workoutsList) {
       const day = getDay(new Date(workout.createdAt));
       dayCount[day]++;
     }
-    
+
     // Format for chart display
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return days.map((name, index) => ({
@@ -423,7 +423,7 @@ export class DatabaseStorage implements IStorage {
   async getUserWorkoutVolume(userId: number): Promise<any[]> {
     const today = new Date();
     const sixMonthsAgo = subMonths(today, 6);
-    
+
     // Get user's workouts from last 6 months
     const workoutsList = await db
       .select()
@@ -433,44 +433,44 @@ export class DatabaseStorage implements IStorage {
         gte(workouts.createdAt, sixMonthsAgo)
       ))
       .orderBy(workouts.createdAt);
-    
+
     const volumeByMonth: Record<string, number> = {};
-    
+
     // Initialize months
     for (let i = 0; i <= 6; i++) {
       const date = subMonths(today, 6 - i);
       const monthKey = format(date, 'MMM');
       volumeByMonth[monthKey] = 0;
     }
-    
+
     // Calculate volume for each workout
     for (const workout of workoutsList) {
       const exercisesList = await db
         .select()
         .from(exercises)
         .where(eq(exercises.workoutId, workout.id));
-      
+
       let workoutVolume = 0;
-      
+
       for (const exercise of exercisesList) {
         const setsList = await db
           .select()
           .from(sets)
           .where(eq(sets.exerciseId, exercise.id));
-        
+
         for (const set of setsList) {
           if (set.weight && set.reps) {
             workoutVolume += set.weight * set.reps;
           }
         }
       }
-      
+
       const monthKey = format(new Date(workout.createdAt), 'MMM');
       if (volumeByMonth[monthKey] !== undefined) {
         volumeByMonth[monthKey] += workoutVolume;
       }
     }
-    
+
     // Convert to array format for charts
     return Object.entries(volumeByMonth).map(([month, volume]) => ({
       month,
@@ -481,7 +481,7 @@ export class DatabaseStorage implements IStorage {
   async getUserActivityData(userId: number): Promise<any[]> {
     const today = new Date();
     const sixMonthsAgo = subMonths(today, 6);
-    
+
     // Get all workouts in the last 6 months
     const workoutsList = await db
       .select()
@@ -490,17 +490,17 @@ export class DatabaseStorage implements IStorage {
         eq(workouts.userId, userId),
         gte(workouts.createdAt, sixMonthsAgo)
       ));
-    
+
     // Group workouts by month
     const monthlyData: Record<string, number> = {};
-    
+
     // Initialize months
     for (let i = 0; i <= 6; i++) {
       const date = subMonths(today, 6 - i);
       const monthKey = format(date, 'MMM yyyy');
       monthlyData[monthKey] = 0;
     }
-    
+
     // Count workouts per month
     for (const workout of workoutsList) {
       const monthKey = format(new Date(workout.createdAt), 'MMM yyyy');
@@ -508,7 +508,7 @@ export class DatabaseStorage implements IStorage {
         monthlyData[monthKey]++;
       }
     }
-    
+
     // Convert to array format for charts
     return Object.entries(monthlyData).map(([date, count]) => ({
       date,
@@ -522,7 +522,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(exercises)
       .where(eq(exercises.id, id));
-    
+
     return exercise || undefined;
   }
 
@@ -534,7 +534,7 @@ export class DatabaseStorage implements IStorage {
         createdAt: new Date(),
       })
       .returning();
-    
+
     return exercise;
   }
 
@@ -544,7 +544,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(sets)
       .where(eq(sets.id, id));
-    
+
     return set || undefined;
   }
 
@@ -553,7 +553,7 @@ export class DatabaseStorage implements IStorage {
       .insert(sets)
       .values(setData)
       .returning();
-    
+
     return set;
   }
 
@@ -563,15 +563,15 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(posts)
       .where(eq(posts.id, id));
-    
+
     if (!post) return undefined;
-    
+
     // Get user info
     const [user] = await db
       .select()
       .from(users)
       .where(eq(users.id, post.userId));
-    
+
     // Get workout info if applicable
     let workout = null;
     if (post.workoutId) {
@@ -579,36 +579,36 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(workouts)
         .where(eq(workouts.id, post.workoutId));
-      
+
       if (workoutData) {
         const exercisesList = await db
           .select()
           .from(exercises)
           .where(eq(exercises.workoutId, workoutData.id));
-        
+
         workout = {
           ...workoutData,
           exerciseCount: exercisesList.length,
         };
       }
     }
-    
+
     // Get comment count
     const commentResult = await db
       .select({ count: count() })
       .from(comments)
       .where(eq(comments.postId, id));
-    
+
     const commentCount = commentResult[0]?.count || 0;
-    
+
     // Get like count
     const likeResult = await db
       .select({ count: count() })
       .from(likes)
       .where(eq(likes.postId, id));
-    
+
     const likeCount = likeResult[0]?.count || 0;
-    
+
     // Combine all data
     return {
       ...post,
@@ -629,15 +629,19 @@ export class DatabaseStorage implements IStorage {
       .from(posts)
       .where(eq(posts.userId, userId))
       .orderBy(desc(posts.createdAt));
-    
-    // Enrich posts with user, workout, and count data
-    return Promise.all(postsList.map(async post => {
+
+    console.log(`Found ${postsList.length} posts for user ${userId}`);
+
+      // Check if current user has liked each post
+      const postsWithLikeStatus = await Promise.all(postsList.map(async (post) => {
+      // Enrich posts with user, workout, and count data
+      // return Promise.all(posts.map(async post => {
       // Get user info
       const [user] = await db
         .select()
         .from(users)
         .where(eq(users.id, post.userId));
-      
+
       // Get workout info if applicable
       let workout = null;
       if (post.workoutId) {
@@ -645,36 +649,36 @@ export class DatabaseStorage implements IStorage {
           .select()
           .from(workouts)
           .where(eq(workouts.id, post.workoutId));
-        
+
         if (workoutData) {
           const exercisesList = await db
             .select()
             .from(exercises)
             .where(eq(exercises.workoutId, workoutData.id));
-          
+
           workout = {
             ...workoutData,
             exerciseCount: exercisesList.length,
           };
         }
       }
-      
+
       // Get comment count
       const commentResult = await db
         .select({ count: count() })
         .from(comments)
         .where(eq(comments.postId, post.id));
-      
+
       const commentCount = commentResult[0]?.count || 0;
-      
+
       // Get like count
       const likeResult = await db
         .select({ count: count() })
         .from(likes)
         .where(eq(likes.postId, post.id));
-      
+
       const likeCount = likeResult[0]?.count || 0;
-      
+
       // Combine all data
       return {
         ...post,
@@ -688,6 +692,8 @@ export class DatabaseStorage implements IStorage {
         likeCount,
       };
     }));
+
+    return postsWithLikeStatus;
   }
 
   async getFeedPosts(userId: number): Promise<any[]> {
@@ -696,22 +702,22 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(follows)
       .where(eq(follows.followerId, userId));
-    
+
     const followingIds = followingList.map(f => f.followingId);
     followingIds.push(userId); // Include user's own posts
-    
+
     // If we have no posts to return, return empty array
     if (followingIds.length === 0) {
       return [];
     }
-    
+
     // Get posts from those users - use inArray for compatibility
     const postsList = await db
       .select()
       .from(posts)
       .where(inArray(posts.userId, followingIds))
       .orderBy(desc(posts.createdAt));
-    
+
     // Enrich posts with user, workout, and count data
     return Promise.all(postsList.map(async post => {
       // Get user info
@@ -719,7 +725,7 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(users)
         .where(eq(users.id, post.userId));
-      
+
       // Get workout info if applicable
       let workout = null;
       if (post.workoutId) {
@@ -727,36 +733,36 @@ export class DatabaseStorage implements IStorage {
           .select()
           .from(workouts)
           .where(eq(workouts.id, post.workoutId));
-        
+
         if (workoutData) {
           const exercisesList = await db
             .select()
             .from(exercises)
             .where(eq(exercises.workoutId, workoutData.id));
-          
+
           workout = {
             ...workoutData,
             exerciseCount: exercisesList.length,
           };
         }
       }
-      
+
       // Get comment count
       const commentResult = await db
         .select({ count: count() })
         .from(comments)
         .where(eq(comments.postId, post.id));
-      
+
       const commentCount = commentResult[0]?.count || 0;
-      
+
       // Get like count
       const likeResult = await db
         .select({ count: count() })
         .from(likes)
         .where(eq(likes.postId, post.id));
-      
+
       const likeCount = likeResult[0]?.count || 0;
-      
+
       // Combine all data
       return {
         ...post,
@@ -781,7 +787,7 @@ export class DatabaseStorage implements IStorage {
         image: null,
       })
       .returning();
-    
+
     return post;
   }
 
@@ -790,16 +796,16 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(comments)
       .where(eq(comments.postId, id));
-    
+
     await db
       .delete(likes)
       .where(eq(likes.postId, id));
-    
+
     // Delete the post
     const result = await db
       .delete(posts)
       .where(eq(posts.id, id));
-    
+
     return result.rowCount > 0;
   }
 
@@ -809,7 +815,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(comments)
       .where(eq(comments.id, id));
-    
+
     return comment || undefined;
   }
 
@@ -821,7 +827,7 @@ export class DatabaseStorage implements IStorage {
         createdAt: new Date(),
       })
       .returning();
-    
+
     return comment;
   }
 
@@ -829,7 +835,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(comments)
       .where(eq(comments.id, id));
-    
+
     return result.rowCount > 0;
   }
 
@@ -842,7 +848,7 @@ export class DatabaseStorage implements IStorage {
         eq(likes.userId, userId),
         eq(likes.postId, postId)
       ));
-    
+
     return !!like;
   }
 
@@ -851,7 +857,7 @@ export class DatabaseStorage implements IStorage {
       .insert(likes)
       .values(likeData)
       .returning();
-    
+
     return like;
   }
 
@@ -862,7 +868,7 @@ export class DatabaseStorage implements IStorage {
         eq(likes.userId, userId),
         eq(likes.postId, postId)
       ));
-    
+
     return result.rowCount > 0;
   }
 
@@ -875,7 +881,7 @@ export class DatabaseStorage implements IStorage {
         eq(follows.followerId, followerId),
         eq(follows.followingId, followingId)
       ));
-    
+
     return !!follow;
   }
 
@@ -884,7 +890,7 @@ export class DatabaseStorage implements IStorage {
       .insert(follows)
       .values(followData)
       .returning();
-    
+
     return follow;
   }
 
@@ -895,7 +901,7 @@ export class DatabaseStorage implements IStorage {
         eq(follows.followerId, followerId),
         eq(follows.followingId, followingId)
       ));
-    
+
     return result.rowCount > 0;
   }
 
@@ -904,7 +910,7 @@ export class DatabaseStorage implements IStorage {
       .select({ count: count() })
       .from(follows)
       .where(eq(follows.followingId, userId));
-    
+
     return result[0]?.count || 0;
   }
 
@@ -913,7 +919,7 @@ export class DatabaseStorage implements IStorage {
       .select({ count: count() })
       .from(follows)
       .where(eq(follows.followerId, userId));
-    
+
     return result[0]?.count || 0;
   }
 }
