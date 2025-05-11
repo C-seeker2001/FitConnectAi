@@ -222,9 +222,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/:id", async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
-      const currentUserId = req.session.userId || null; // Optional auth
+      if (!userId || isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
       
-      console.log(`Profile request - Loading profile for user ID: ${userId}, requested by user ID: ${currentUserId}`);
+      console.log(`Profile request - Loading profile for user ID: ${userId}`);
       
       const user = await storage.getUser(userId);
       
