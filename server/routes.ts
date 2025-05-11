@@ -393,13 +393,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get user posts
   app.get("/api/users/:id/posts", async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
     try {
       const userId = parseInt(req.params.id);
+      console.log(`Getting posts for user ID: ${userId}`);
+      
       const posts = await storage.getUserPosts(userId);
+      console.log(`Found ${posts.length} posts for user ${userId}`);
 
       // Check if current user has liked each post
       const postsWithLikeStatus = await Promise.all(posts.map(async (post) => {
