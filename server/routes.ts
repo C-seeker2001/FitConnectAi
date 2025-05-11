@@ -424,7 +424,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const filter = req.query.filter as string || "all";
       const dateStr = req.query.date as string || null;
-      const targetUserId = parseInt(req.query.userId as string) || req.session.userId;
+      // Fix: Ensure targetUserId is properly set
+      const targetUserId = req.query.userId ? parseInt(req.query.userId as string) : req.session.userId;
+      
+      console.log(`Getting workouts for user ${targetUserId} with filter: ${filter}`);
       
       let date: Date | null = null;
       if (dateStr) {
@@ -432,6 +435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const workouts = await storage.getUserWorkouts(targetUserId, filter, date);
+      console.log(`Found ${workouts.length} workouts`);
       res.json(workouts);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
