@@ -772,12 +772,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if current user has liked each post
       const postsWithLikeStatus = await Promise.all(posts.map(async (post) => {
         const liked = req.session.userId ? await storage.hasUserLikedPost(req.session.userId, post.id) : false;
-        const comments = await db
+        const postComments = await db
           .select()
           .from(comments)
           .where(eq(comments.postId, post.id))
           .orderBy(desc(comments.createdAt));
-        return { ...post, liked, comments };
+        return { ...post, liked, comments: postComments };
       }));
 
       console.log(`Sending ${postsWithLikeStatus.length} posts with like status`);
