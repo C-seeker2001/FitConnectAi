@@ -205,13 +205,13 @@ export default function PostItem({ post }: PostProps) {
       </div>
 
       {/* Comments Section */}
-      {(showComments || post.commentCount === 0) && (
+      {showComments && (
         <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
           {/* Comment Form */}
           <CommentForm postId={post.id} />
           
           {/* Comments */}
-          {post.comments && post.comments.length > 0 && (
+          {post.comments?.length > 0 && (
             <div className="mt-3 space-y-3">
               {post.comments.map((comment: any) => (
                 <CommentItem key={comment.id} comment={comment} postId={post.id} />
