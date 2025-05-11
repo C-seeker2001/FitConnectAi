@@ -14,17 +14,17 @@ import { formatDateWithDay } from "@/lib/utils";
 export default function RightSidebar() {
   const { user } = useAuth();
 
-  const { data: trendingPrograms, isLoading: loadingPrograms } = useQuery({
+  const { data: trendingPrograms, isLoading: loadingPrograms } = useQuery<any[]>({
     queryKey: ['/api/programs/trending'],
     enabled: !!user
   });
 
-  const { data: leaderboard, isLoading: loadingLeaderboard } = useQuery({
+  const { data: leaderboard, isLoading: loadingLeaderboard } = useQuery<any[]>({
     queryKey: ['/api/leaderboard'],
     enabled: !!user
   });
 
-  const { data: upcomingWorkouts, isLoading: loadingUpcoming } = useQuery({
+  const { data: upcomingWorkouts, isLoading: loadingUpcoming } = useQuery<any[]>({
     queryKey: ['/api/workouts/upcoming'],
     enabled: !!user
   });
@@ -84,8 +84,8 @@ export default function RightSidebar() {
         </div>
         
         <div className="mt-3 text-center">
-          <Link href="/discover">
-            <a className="text-accent text-sm font-medium">View All Programs</a>
+          <Link href="/discover" className="text-accent text-sm font-medium">
+            View All Programs
           </Link>
         </div>
       </div>
@@ -194,11 +194,9 @@ export default function RightSidebar() {
           )}
           
           <div className="mt-2 text-center">
-            <Link href="/workouts/schedule">
-              <a className="text-accent text-sm font-medium">
-                <CalendarDays className="h-4 w-4 inline mr-1" />
-                Schedule Workout
-              </a>
+            <Link href="/workouts/schedule" className="text-accent text-sm font-medium">
+              <CalendarDays className="h-4 w-4 inline mr-1" />
+              Schedule Workout
             </Link>
           </div>
         </div>
