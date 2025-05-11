@@ -401,13 +401,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.params.id);
       const posts = await storage.getUserPosts(userId);
       
-      // Check if current user has liked each post
-      const postsWithLikeStatus = await Promise.all(posts.map(async (post) => {
-        const liked = await storage.hasUserLikedPost(req.session.userId!, post.id);
-        return { ...post, liked };
+      // Check if current user has liked each post and get comments
+      const postsWithData = await Promise.all(posts.map(async (post) => {
+        const [liked, comments] = await Promise.all([
+          storage.hasUserLikedPost(req.session.userId!, post.id),
+          storage.getPostComments(post.id)
+        ]);
+        return { ...post, liked, comments };
       }));
       
-      res.json(postsWithLikeStatus);
+      res.json(postsWithData);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
     }
@@ -759,10 +762,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const posts = await storage.getFeedPosts(req.session.userId);
       console.log(`Found ${posts.length} posts for feed`);
       
-      // Check if current user has liked each post
-      const postsWithLikeStatus = await Promise.all(posts.map(async (post) => {
-        const liked = await storage.hasUserLikedPost(req.session.userId!, post.id);
-        return { ...post, liked };
+      // Check if current user has liked each post and get comments
+      const postsWithData = await Promise.all(posts.map(async (post) => {
+        const [liked, comments] = await Promise.all([
+          storage.hasUserLikedPost(req.session.userId!, post.id),
+          storage.getPostComments(post.id)
+        ]);
+        return { ...post, liked, comments };
       }));
       
       res.json(postsWithLikeStatus);
