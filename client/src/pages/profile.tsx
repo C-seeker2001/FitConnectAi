@@ -77,7 +77,8 @@ export default function Profile() {
 
   const { data: posts, isLoading: postsLoading } = useQuery<any[]>({
     queryKey: ['/api/users', userId, 'posts'],
-    enabled: !!userId,
+    queryFn: () => apiRequest('GET', `/api/users/${userId}/posts`),
+    enabled: userId !== null
   });
 
   const followMutation = useMutation({
