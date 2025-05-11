@@ -212,10 +212,11 @@ export default function PostItem({ post }: PostProps) {
           
           {/* Comments */}
           <div className="mt-3 space-y-3">
-            {post.comments && post.comments.map((comment: any) => (
-              <CommentItem key={comment.id} comment={comment} postId={post.id} />
-            ))}
-            {(!post.comments || post.comments.length === 0) && (
+            {post.comments?.length > 0 ? (
+              post.comments.map((comment: any) => (
+                <CommentItem key={comment.id} comment={comment} postId={post.id} />
+              ))
+            ) : (
               <div className="text-center text-sm text-secondary">
                 No comments yet. Be the first to comment!
               </div>
