@@ -117,17 +117,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const workouts = await storage.getUserWorkouts(userId);
       const comments = await db.select().from(comments).where(eq(comments.userId, userId));
 
-      console.log("--------Current User Stats--------");
-      console.log("Current user Logged In:", user.username);
-      console.log("--------");
-      console.log("Current user ID:", userId);
-      console.log("--------");
-      console.log("Current user posts counts:", userPosts.length);
-      console.log("--------");
-      console.log("Current user comments counts:", comments.length);
-      console.log("--------");
-      console.log("Current user Workout counts:", workouts.length);
-      console.log("--------");
+      console.log("\n===========================================");
+      console.log("Current user Logged In");
+      console.log("===========================================");
+      console.log(user.username);
+      console.log("\n===========================================");
+      console.log("Current user ID");
+      console.log("===========================================");
+      console.log(userId);
+      console.log("\n===========================================");
+      console.log("Current user posts counts");
+      console.log("===========================================");
+      console.log(userPosts.length);
+      console.log("\n===========================================");
+      console.log("Current user comments counts");
+      console.log("===========================================");
+      console.log(comments.length);
+      console.log("\n===========================================");
+      console.log("Current user Workout counts");
+      console.log("===========================================");
+      console.log(workouts.length);
+      console.log("===========================================\n");
 
       // Don't send password to client
       const { password, ...userWithoutPassword } = user;
