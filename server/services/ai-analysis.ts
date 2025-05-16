@@ -76,33 +76,30 @@ export async function analyzeWorkoutProgress(workouts: typeof workouts.$inferSel
       messages: [
         {
           role: "system", 
-          content: "You are an expert fitness coach and personal trainer who specializes in personalized workout analysis. You provide clear, concise, and actionable advice."
+          content: "You are a data-driven fitness analyst and coach. Focus on providing precise, actionable insights based on workout metrics and progression patterns."
         },
         {
           role: "user", 
-          content: `Provide a personalized workout analysis based on this fitness data:
+          content: `Analyze this workout data and provide strategic recommendations:
 
 \`\`\`json
 ${JSON.stringify(workoutData, null, 2)}
 \`\`\`
 
-In your analysis, include:
+Structure your response as follows:
 
-1. A brief summary of overall progress (2-3 sentences)
-2. Insights on workout frequency and consistency 
-3. Analysis of volume progression over time
-4. Specific strengths identified in their workout routine
-5. Areas that need improvement
-6. 3-5 actionable recommendations to maximize results
+1. Performance Summary (key metrics and trends)
+2. Workout Pattern Analysis
+3. Volume & Intensity Insights
+4. Top 3 Strengths
+5. Top 3 Areas for Optimization
+6. Action Plan (3 specific, measurable steps)
 
-Your response should be encouraging, highlight positives, but also provide honest feedback for improvement.
-
-Format your response in clean Markdown with:
-- Clear section headers (##)
+Use clear markdown formatting with:
+## For main sections
 - Bullet points for lists
-- Bold text for key metrics
-- No preamble or thinking out loud - just give the analysis directly
-- Concise language - limit to 300-400 words total`
+**Bold** for key metrics
+Keep response under 300 words`
         }
       ],
       temperature: 0.4,
