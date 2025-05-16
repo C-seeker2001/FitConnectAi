@@ -65,20 +65,16 @@ export default function Progress() {
           <CardTitle>AI Coach</CardTitle>
           <CardDescription>Understand and optimize your fitness journey</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-3">
-          <div className="flex items-center">
-            <Terminal className="h-4 w-4 text-gray-500 mr-2" />
-            Workout Plan
-          </div>
-          <div className="flex items-center">
-            <Activity className="h-4 w-4 text-gray-500 mr-2" />
-            Progress Tracking
-          </div>
-          <div className="flex items-center">
-            <Dumbbell className="h-4 w-4 text-gray-500 mr-2" />
-            Personalized Exercises
-          </div>
-        </CardContent>
+        <CardContent>
+            <div className="flex items-center">
+              <Activity className="h-4 w-4 text-gray-500 mr-2" />
+              <div>
+                <div className="font-medium">AI Progress Analysis</div>
+                <div className="text-sm text-muted-foreground">Reviewing your sessions and predicting future progress</div>
+              </div>
+            </div>
+          </CardContent>
+
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
