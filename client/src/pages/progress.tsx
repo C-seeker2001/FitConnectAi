@@ -76,9 +76,13 @@ export default function Progress() {
               </div>
               {workoutMetrics ? (
                 <div className="text-sm whitespace-pre-wrap">
-                  <Query queryKey={['/api/analysis/workouts']}>
-                    {(data) => data.analysis || 'No analysis available yet.'}
-                  </Query>
+                  {(() => {
+                    const { data } = useQuery({
+                      queryKey: ['/api/analysis/workouts'],
+                      enabled: !!workoutMetrics
+                    });
+                    return data?.analysis || 'No analysis available yet.';
+                  })()}
                 </div>
               ) : (
                 <div className="text-sm text-muted-foreground">
