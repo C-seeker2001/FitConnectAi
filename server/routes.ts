@@ -7,6 +7,7 @@ import { insertUserSchema, insertWorkoutSchema, insertPostSchema, insertCommentS
 import MemoryStore from "memorystore";
 import { db } from "./db";
 import { eq, count, and, desc, inArray } from "drizzle-orm";
+import { analyzeWorkoutProgress } from "./services/ai-analysis";
 
 const SessionStore = MemoryStore(session);
 
@@ -1328,11 +1329,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
-
-  return httpServer;
-}
-
   // Get AI analysis of workout progress
   app.get("/api/analysis/workouts", async (req, res) => {
     if (!req.session.userId) {
@@ -1347,3 +1343,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to analyze workouts" });
     }
   });
+  
+  const httpServer = createServer(app);
+
+  return httpServer;
+}
