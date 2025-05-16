@@ -62,8 +62,8 @@ export default function Progress() {
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>AI Couch</CardTitle>
-          <CardDescription>AI Powered workout plan</CardDescription>
+          <CardTitle>AI Coach</CardTitle>
+          <CardDescription>Understand and optimize your fitness journey</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-3">
           <div className="flex items-center">
