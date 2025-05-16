@@ -17,7 +17,7 @@ import {
   Bar,
 } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader, Share2, Info } from "lucide-react";
+import { Loader, Share2, Info, Terminal, Activity, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Progress() {
@@ -59,6 +59,27 @@ export default function Progress() {
           Export Data
         </Button>
       </div>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>AI Couch</CardTitle>
+          <CardDescription>AI Powered workout plan</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 grid-cols-1 md:grid-cols-3">
+          <div className="flex items-center">
+            <Terminal className="h-4 w-4 text-gray-500 mr-2" />
+            Workout Plan
+          </div>
+          <div className="flex items-center">
+            <Activity className="h-4 w-4 text-gray-500 mr-2" />
+            Progress Tracking
+          </div>
+          <div className="flex items-center">
+            <Dumbbell className="h-4 w-4 text-gray-500 mr-2" />
+            Personalized Exercises
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card>
