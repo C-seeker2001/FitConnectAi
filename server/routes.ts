@@ -1332,3 +1332,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   return httpServer;
 }
+
+  // Get AI analysis of workout progress
+  app.get("/api/analysis/workouts", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const userWorkouts = await storage.getUserWorkouts(req.session.userId);
+      const analysis = await analyzeWorkoutProgress(userWorkouts);
+      res.json({ analysis });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to analyze workouts" });
+    }
+  });

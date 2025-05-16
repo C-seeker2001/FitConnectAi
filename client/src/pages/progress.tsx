@@ -66,12 +66,25 @@ export default function Progress() {
           <CardDescription>Understand and optimize your fitness journey</CardDescription>
         </CardHeader>
         <CardContent>
-            <div className="flex items-center">
-              <Activity className="h-4 w-4 text-gray-500 mr-2" />
-              <div>
-                <div className="font-medium">AI Progress Analysis</div>
-                <div className="text-sm text-muted-foreground">Reviewing your sessions and predicting future progress</div>
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <Activity className="h-4 w-4 text-gray-500 mr-2" />
+                <div>
+                  <div className="font-medium">AI Progress Analysis</div>
+                  <div className="text-sm text-muted-foreground">Reviewing your sessions and predicting future progress</div>
+                </div>
               </div>
+              {workoutMetrics ? (
+                <div className="text-sm whitespace-pre-wrap">
+                  <Query queryKey={['/api/analysis/workouts']}>
+                    {(data) => data.analysis || 'No analysis available yet.'}
+                  </Query>
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  Start logging workouts to get AI-powered insights
+                </div>
+              )}
             </div>
           </CardContent>
 
