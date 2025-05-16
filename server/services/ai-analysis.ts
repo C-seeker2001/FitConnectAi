@@ -45,12 +45,7 @@ Keep up the great work! Consistency is key to reaching your fitness goals.
 }
 
 export async function analyzeWorkoutProgress(workouts: typeof workouts.$inferSelect[]) {
-  const API_KEY = process.env.NVIDIA_NIM_KEY;
-  
-  if (!API_KEY) {
-    console.error('NVIDIA_NIM_KEY is not set');
-    return 'AI analysis not available. API key not configured.';
-  }
+  // No need for API check here, we'll handle that in the try block
   
   if (!workouts || workouts.length === 0) {
     return 'No workout data available to analyze. Complete some workouts to get AI insights.';
@@ -58,19 +53,28 @@ export async function analyzeWorkoutProgress(workouts: typeof workouts.$inferSel
   
   // Format workout data for analysis
   const workoutData = workouts.map(w => ({
-    name: w.name,
+    name: w.name || 'Unnamed Workout',
     date: w.createdAt ? new Date(w.createdAt).toISOString().split('T')[0] : 'unknown date',
     exercises: w.exerciseCount || 0,
     volume: w.volume || 0
   }));
 
   try {
-    // First try the NVIDIA NIM Claude model
+    // Always return the local analysis for now until we can debug the API
+    return generateLocalAnalysis(workoutData);
+    
+    /* Commenting out API call for now since it's failing
+    const API_KEY = process.env.NVIDIA_NIM_KEY;
+    if (!API_KEY) {
+      console.error('NVIDIA_NIM_KEY is not set');
+      return generateLocalAnalysis(workoutData);
+    }
+    
+    // Try a simple API call to NVIDIA NIM API
     const response = await fetch('https://api.nvcf.nvidia.com/v2/nvcf/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${API_KEY}`,
-        'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -78,45 +82,50 @@ export async function analyzeWorkoutProgress(workouts: typeof workouts.$inferSel
         messages: [
           {
             role: "user",
-            content: `You are a professional fitness coach analyzing workout data. Provide detailed insights, progress analysis, and recommendations based on the following workout history. Be encouraging but also suggest specific improvements.
-
-Workout History:
-${JSON.stringify(workoutData, null, 2)}
-
-Analyze:
-1. Workout frequency and consistency
-2. Volume progression over time
-3. Exercise variety and balance
-4. Specific strengths and areas for improvement
-5. Recommendations for future workouts to maximize results
-
-Format your response with Markdown headings and bullet points for easy readability.`
+            content: "Hello, this is a test message. Please respond with 'Hello from Claude'."
           }
         ],
-        temperature: 0.7,
-        max_tokens: 800
+        max_tokens: 20
       })
     });
-
+    
     if (!response.ok) {
       console.error('NVIDIA NIM API error:', response.status, response.statusText);
-      const errorText = await response.text();
-      console.error('Error details:', errorText);
       return generateLocalAnalysis(workoutData);
     }
-
+    
     const data = await response.json();
+    console.log('NVIDIA NIM API response:', JSON.stringify(data));
     
-    // Log the full response for debugging
-    console.log('NVIDIA NIM API response:', JSON.stringify(data, null, 2));
+    // If we get a successful response, try the full workout analysis
+    const analysisResponse = await fetch('https://api.nvcf.nvidia.com/v2/nvcf/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: "anthropic.claude-3-opus-20240229-v1:0",
+        messages: [
+          {
+            role: "user",
+            content: `Analyze this workout data: ${JSON.stringify(workoutData)}`
+          }
+        ],
+        max_tokens: 500
+      })
+    });
     
-    // Handle the response format for Claude API
-    if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
-      return data.choices[0].message.content;
-    } else {
-      console.error('Unexpected response format:', data);
+    if (!analysisResponse.ok) {
       return generateLocalAnalysis(workoutData);
     }
+    
+    const analysisData = await analysisResponse.json();
+    
+    if (analysisData.choices && analysisData.choices[0] && analysisData.choices[0].message) {
+      return analysisData.choices[0].message.content;
+    }
+    */
   } catch (error) {
     console.error('Error analyzing workouts:', error);
     return generateLocalAnalysis(workoutData);
