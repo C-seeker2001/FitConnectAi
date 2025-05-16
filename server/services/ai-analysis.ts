@@ -121,12 +121,23 @@ Use markdown formatting with:
     // Get the AI-generated analysis
     let analysisContent = completion.choices[0]?.message?.content || generateLocalAnalysis(workoutData);
     
-    // Filter out any "<think>...</think>" content that might be in the response
-    analysisContent = analysisContent.replace(/<think>[\s\S]*?<\/think>/g, '');
+    // Skip to the first ## heading (which should be the Performance Summary section)
+    // This effectively removes any thinking process content that appears before the actual analysis
+    const firstHeadingIndex = analysisContent.indexOf('## Performance Summary');
+    if (firstHeadingIndex !== -1) {
+      analysisContent = analysisContent.substring(firstHeadingIndex);
+    }
     
-    // Also remove any other thinking process content from different model formats
-    analysisContent = analysisContent.replace(/^(```|<)[^>]*thinking[^>]*(>|```)([\s\S]*?)(```|<\/)[^>]*(>|```)/gim, '');
-    analysisContent = analysisContent.replace(/^thinking:[\s\S]*?(?=\n\n)/gim, '');
+    // Remove any thinking process tags and content
+    analysisContent = analysisContent.replace(/<think>[\s\S]*?<\/think>/g, '');
+    analysisContent = analysisContent.replace(/<thinking>[\s\S]*?<\/thinking>/g, '');
+    analysisContent = analysisContent.replace(/```thinking[\s\S]*?```/g, '');
+    analysisContent = analysisContent.replace(/```think[\s\S]*?```/g, '');
+    
+    // Clean up any other thinking indicators
+    analysisContent = analysisContent.replace(/^think:/gim, '');
+    analysisContent = analysisContent.replace(/^thinking:/gim, '');
+    analysisContent = analysisContent.replace(/^thought process:/gim, '');
     
     // Trim any extra whitespace that might be left after removing content
     analysisContent = analysisContent.trim();
