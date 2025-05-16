@@ -20,6 +20,35 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Loader, Share2, Info, Terminal, Activity, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Simple function to convert markdown to HTML for display
+function convertMarkdownToHtml(markdown: string): string {
+  if (!markdown) return '';
+  
+  // Convert headings: ## Heading -> <h2>Heading</h2>
+  let html = markdown.replace(/## (.*$)/gim, '<h2 class="text-lg font-semibold mt-3 mb-2">$1</h2>');
+  html = html.replace(/### (.*$)/gim, '<h3 class="text-base font-medium mt-2 mb-1">$1</h3>');
+  
+  // Convert bold: **text** -> <strong>text</strong>
+  html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+  
+  // Convert bullet points: - item -> <li>item</li>
+  html = html.replace(/- (.*$)/gim, '<li class="ml-4">$1</li>');
+  
+  // Convert numbered lists: 1. item -> <li>item</li>
+  html = html.replace(/\d+\. (.*$)/gim, '<li class="ml-4">$1</li>');
+  
+  // Convert paragraphs: blank line -> </p><p>
+  html = html.replace(/\n\s*\n/gim, '</p><p class="my-2">');
+  
+  // Wrap in paragraphs
+  html = '<p class="my-2">' + html + '</p>';
+  
+  // Clean up empty paragraphs
+  html = html.replace(/<p><\/p>/gim, '');
+  
+  return html;
+}
+
 export default function Progress() {
   const { user, isLoading: authLoading } = useAuth();
   const [_, navigate] = useLocation();
@@ -80,8 +109,12 @@ export default function Progress() {
                 </div>
               </div>
               {workoutMetrics ? (
-                <div className="text-sm whitespace-pre-wrap">
-                  {workoutAnalysis?.analysis || 'No analysis available yet.'}
+                <div className="text-sm prose prose-sm max-w-none">
+                  {workoutAnalysis?.analysis ? (
+                    <div className="markdown whitespace-pre-wrap">{workoutAnalysis.analysis}</div>
+                  ) : (
+                    'No analysis available yet.'
+                  )}
                 </div>
               ) : (
                 <div className="text-sm text-muted-foreground">

@@ -75,25 +75,39 @@ export async function analyzeWorkoutProgress(workouts: typeof workouts.$inferSel
       model: "deepseek-ai/deepseek-r1",
       messages: [
         {
+          role: "system", 
+          content: "You are an expert fitness coach and personal trainer who specializes in personalized workout analysis. You provide clear, concise, and actionable advice."
+        },
+        {
           role: "user", 
-          content: `You are a professional fitness coach analyzing workout data. Provide detailed insights, progress analysis, and recommendations based on the following workout history. Be encouraging but also suggest specific improvements.
+          content: `Provide a personalized workout analysis based on this fitness data:
 
-Workout History:
+\`\`\`json
 ${JSON.stringify(workoutData, null, 2)}
+\`\`\`
 
-Analyze:
-1. Workout frequency and consistency
-2. Volume progression over time
-3. Exercise variety and balance
-4. Specific strengths and areas for improvement
-5. Recommendations for future workouts to maximize results
+In your analysis, include:
 
-Format your response with Markdown headings and bullet points for easy readability.`
+1. A brief summary of overall progress (2-3 sentences)
+2. Insights on workout frequency and consistency 
+3. Analysis of volume progression over time
+4. Specific strengths identified in their workout routine
+5. Areas that need improvement
+6. 3-5 actionable recommendations to maximize results
+
+Your response should be encouraging, highlight positives, but also provide honest feedback for improvement.
+
+Format your response in clean Markdown with:
+- Clear section headers (##)
+- Bullet points for lists
+- Bold text for key metrics
+- No preamble or thinking out loud - just give the analysis directly
+- Concise language - limit to 300-400 words total`
         }
       ],
-      temperature: 0.6,
-      top_p: 0.7,
-      max_tokens: 2000,
+      temperature: 0.4,
+      top_p: 0.85,
+      max_tokens: 1200,
       stream: false
     });
     
