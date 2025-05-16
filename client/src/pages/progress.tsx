@@ -1,3 +1,33 @@
+
+// Simple function to convert markdown to HTML for display
+function convertMarkdownToHtml(markdown: string): string {
+  if (!markdown) return '';
+  
+  // Convert headings: ## Heading -> <h2>Heading</h2>
+  let html = markdown.replace(/## (.*$)/gim, '<h2 class="text-lg font-semibold mt-3 mb-2">$1</h2>');
+  
+  // Convert bold: **text** -> <strong>text</strong>
+  html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+  
+  // Convert bullet points: - item -> <li>item</li>
+  html = html.replace(/^\s*[-*]\s+(.*$)/gim, '<li class="ml-4">$1</li>');
+  
+  // Convert numbered lists: 1. item -> <li>item</li>
+  html = html.replace(/^\s*\d+\.\s+(.*$)/gim, '<li class="ml-4">$1</li>');
+  
+  // Convert paragraphs: blank line -> </p><p>
+  html = html.replace(/\n\s*\n/g, '</p><p class="my-2">');
+  
+  // Wrap in paragraphs
+  html = '<p class="my-2">' + html + '</p>';
+  
+  // Clean up empty paragraphs
+  html = html.replace(/<p><\/p>/g, '');
+  
+  return html;
+}
+
+
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -111,7 +141,12 @@ export default function Progress() {
               {workoutMetrics ? (
                 <div className="text-sm prose prose-sm max-w-none">
                   {workoutAnalysis?.analysis ? (
-                    <div className="markdown whitespace-pre-wrap">{workoutAnalysis.analysis}</div>
+                    <div 
+                      className="markdown" 
+                      dangerouslySetInnerHTML={{ 
+                        __html: convertMarkdownToHtml(workoutAnalysis.analysis.replace('<think>\n', ''))
+                      }} 
+                    />
                   ) : (
                     'No analysis available yet.'
                   )}
