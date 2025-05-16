@@ -86,20 +86,30 @@ export async function analyzeWorkoutProgress(workouts: typeof workouts.$inferSel
 ${JSON.stringify(workoutData, null, 2)}
 \`\`\`
 
-Structure your response as follows:
+Structure your response with EXACTLY these 5 sections in this order, using the exact headings shown:
 
-1. Performance Summary (key metrics and trends)
-2. Workout Pattern Analysis
-3. Volume & Intensity Insights
-4. Top 3 Strengths
-5. Top 3 Areas for Optimization
-6. Action Plan (3 specific, measurable steps)
+## Performance Summary
+Brief overview of current fitness level, key metrics, and trends
 
-Use clear markdown formatting with:
-## For main sections
+## Workout Pattern Analysis
+Analysis of workout frequency, consistency, and exercise selection
+
+## Volume & Intensity
+Insights on training volume progression and intensity levels
+
+## Top 3 Strengths
+The 3 most positive aspects of the user's workout routine
+
+## Top 5 Areas for Optimization
+The 5 most important areas for improvement
+
+## Action Plan
+3-5 specific, measurable action steps to improve results
+
+Use markdown formatting with:
 - Bullet points for lists
-**Bold** for key metrics
-Keep response under 300 words`
+- **Bold text** for emphasis on key metrics and important points
+- Keep the entire analysis under 400 words total`
         }
       ],
       temperature: 0.4,
@@ -108,8 +118,21 @@ Keep response under 300 words`
       stream: false
     });
     
-    // Return the AI-generated analysis
-    return completion.choices[0]?.message?.content || generateLocalAnalysis(workoutData);
+    // Get the AI-generated analysis
+    let analysisContent = completion.choices[0]?.message?.content || generateLocalAnalysis(workoutData);
+    
+    // Filter out any "<think>...</think>" content that might be in the response
+    analysisContent = analysisContent.replace(/<think>[\s\S]*?<\/think>/g, '');
+    
+    // Also remove any other thinking process content from different model formats
+    analysisContent = analysisContent.replace(/^(```|<)[^>]*thinking[^>]*(>|```)([\s\S]*?)(```|<\/)[^>]*(>|```)/gim, '');
+    analysisContent = analysisContent.replace(/^thinking:[\s\S]*?(?=\n\n)/gim, '');
+    
+    // Trim any extra whitespace that might be left after removing content
+    analysisContent = analysisContent.trim();
+    
+    // Return the cleaned analysis
+    return analysisContent;
   } catch (error) {
     console.error('Error analyzing workouts:', error);
     // Return the locally generated analysis as fallback
