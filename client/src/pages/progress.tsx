@@ -33,6 +33,11 @@ export default function Progress() {
     queryKey: ['/api/metrics/exercises'],
     enabled: !!user,
   });
+  
+  const { data: workoutAnalysis } = useQuery({
+    queryKey: ['/api/analysis/workouts'],
+    enabled: !!workoutMetrics,
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -76,13 +81,7 @@ export default function Progress() {
               </div>
               {workoutMetrics ? (
                 <div className="text-sm whitespace-pre-wrap">
-                  {(() => {
-                    const { data } = useQuery({
-                      queryKey: ['/api/analysis/workouts'],
-                      enabled: !!workoutMetrics
-                    });
-                    return data?.analysis || 'No analysis available yet.';
-                  })()}
+                  {workoutAnalysis?.analysis || 'No analysis available yet.'}
                 </div>
               ) : (
                 <div className="text-sm text-muted-foreground">
