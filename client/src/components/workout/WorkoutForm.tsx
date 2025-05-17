@@ -204,10 +204,15 @@ export default function WorkoutForm({
       if (!workoutToEdit || !workoutToEdit.id) {
         throw new Error("No workout ID provided");
       }
-      const response = await apiRequest('PATCH', `/api/workouts/${workoutToEdit.id}`, {
-        ...data,
-        useMetric,
-      });
+      
+      // Simplify the data we're sending for the update to avoid JSON parsing issues
+      const updateData = {
+        name: data.name,
+        useMetric: useMetric,
+        notes: data.notes || null,
+      };
+      
+      const response = await apiRequest('PATCH', `/api/workouts/${workoutToEdit.id}`, updateData);
       return response.json();
     },
     onSuccess: () => {

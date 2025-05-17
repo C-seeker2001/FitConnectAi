@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
 import { z } from "zod";
-import { insertUserSchema, insertWorkoutSchema, insertPostSchema, insertCommentSchema, follows, users, posts, comments, likes, workouts, exercises } from "@shared/schema";
+import { insertUserSchema, insertWorkoutSchema, insertPostSchema, insertCommentSchema, follows, users, posts, comments, likes, workouts, exercises, type Workout } from "@shared/schema";
 import MemoryStore from "memorystore";
 import { db } from "./db";
 import { eq, count, and, desc, inArray } from "drizzle-orm";
@@ -498,8 +498,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Not authorized to update this workout" });
       }
 
-      // Update the workout
-      const updatedWorkout = await storage.updateWorkout(workoutId, req.body);
+      // Update only the core workout properties for now
+      const updatedWorkout = await storage.updateWorkout(workoutId, {
+        name: req.body.name,
+        useMetric: req.body.useMetric,
+        notes: req.body.notes,
+      });
       
       res.json(updatedWorkout);
     } catch (error) {
