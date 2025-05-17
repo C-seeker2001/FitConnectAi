@@ -45,10 +45,17 @@ export default function Workouts() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  const { data: workouts, isLoading: workoutsLoading } = useQuery({
+  const { data: workouts, isLoading: workoutsLoading, refetch: refetchWorkouts } = useQuery({
     queryKey: ['/api/workouts', filter, selectedDate?.toISOString()],
     enabled: !!user,
   });
+  
+  // Refetch workouts when showWorkoutForm closes to ensure we have the latest data
+  useEffect(() => {
+    if (!showWorkoutForm && user) {
+      refetchWorkouts();
+    }
+  }, [showWorkoutForm, refetchWorkouts, user]);
 
   const { data: templates, isLoading: templatesLoading } = useQuery({
     queryKey: ['/api/workouts/templates'],
