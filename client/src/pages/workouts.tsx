@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { Calendar, ChevronLeft, ChevronRight, Filter, Loader, Plus } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Filter, Loader, Plus, X, ClipboardList, Clock, Dumbbell, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -12,6 +12,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +38,7 @@ export default function Workouts() {
   const [tab, setTab] = useState("history");
   const [filter, setFilter] = useState("all");
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
 
   // Get current date for calendar navigation
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -256,7 +265,12 @@ export default function Workouts() {
                     )}
                   </CardContent>
                   <CardFooter className="pt-0">
-                    <Button variant="ghost" size="sm" className="ml-auto">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="ml-auto"
+                      onClick={() => setSelectedWorkout(workout)}
+                    >
                       View Details
                     </Button>
                   </CardFooter>
@@ -356,6 +370,87 @@ export default function Workouts() {
         }} 
         initialTemplate={selectedTemplate}
       />
+
+      {/* Workout Details Dialog */}
+      <Dialog open={!!selectedWorkout} onOpenChange={(open) => !open && setSelectedWorkout(null)}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{selectedWorkout?.name}</DialogTitle>
+          </DialogHeader>
+          
+          {selectedWorkout && (
+            <div className="space-y-4">
+              <div className="text-sm text-secondary">
+                {new Date(selectedWorkout.createdAt).toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  month: 'long', 
+                  day: 'numeric', 
+                  year: 'numeric' 
+                })}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardContent className="p-4 flex items-center">
+                    <Clock className="h-5 w-5 mr-2 text-accent" />
+                    <div>
+                      <p className="font-medium">Duration</p>
+                      <p className="text-secondary">{selectedWorkout.duration}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4 flex items-center">
+                    <Dumbbell className="h-5 w-5 mr-2 text-accent" />
+                    <div>
+                      <p className="font-medium">Volume</p>
+                      <p className="text-secondary">{selectedWorkout.volume} {selectedWorkout.useMetric ? 'kg' : 'lbs'}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Exercises</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {selectedWorkout.exercises && selectedWorkout.exercises.length > 0 ? (
+                    <div className="space-y-3">
+                      {selectedWorkout.exercises.map((exercise: string, index: number) => (
+                        <div key={index} className="flex items-center p-2 bg-gray-50 rounded-md">
+                          <ClipboardList className="h-4 w-4 mr-2 text-accent" />
+                          <span>{exercise}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-secondary text-sm">No exercises recorded for this workout</p>
+                  )}
+                </CardContent>
+              </Card>
+              
+              {selectedWorkout.notes && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Notes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-secondary text-sm">{selectedWorkout.notes}</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setSelectedWorkout(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
