@@ -1336,10 +1336,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const userWorkouts = await storage.getUserWorkouts(req.session.userId);
-      const analysis = await analyzeWorkoutProgress(userWorkouts);
-      res.json({ analysis });
+      const userId = req.session.userId;
+      const userWorkouts = await storage.getUserWorkouts(userId);
+      
+      if (!userWorkouts || userWorkouts.length === 0) {
+        return res.json({ analysis: 'No workout data available to analyze. Complete some workouts to get AI insights.' });
+      }
+      
+      // Check if we have a cached analysis
+      const cachedAnalysis = await storage.getWorkoutAnalysis(userId);
+      const lastWorkout = userWorkouts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+      const workoutCount = userWorkouts.length;
+      
+      // If cache exists and is still valid (no new workouts since last analysis)
+      if (cachedAnalysis && 
+          cachedAnalysis.workoutCount === workoutCount && 
+          new Date(cachedAnalysis.lastWorkoutDate).getTime() >= new Date(lastWorkout.createdAt).getTime()) {
+        console.log('Using cached workout analysis');
+        return res.json({ analysis: cachedAnalysis.analysis });
+      }
+      
+      // Otherwise generate a new analysis
+      console.log('Generating new workout analysis');
+      const analysisText = await analyzeWorkoutProgress(userWorkouts);
+      
+      // Save the analysis to cache
+      if (cachedAnalysis) {
+        // Update existing cache
+        await storage.updateWorkoutAnalysis(cachedAnalysis.id, {
+          analysis: analysisText,
+          lastWorkoutDate: new Date(lastWorkout.createdAt),
+          workoutCount,
+          updatedAt: new Date()
+        });
+      } else {
+        // Create new cache entry
+        await storage.saveWorkoutAnalysis({
+          userId,
+          analysis: analysisText,
+          lastWorkoutDate: new Date(lastWorkout.createdAt),
+          workoutCount
+        });
+      }
+      
+      res.json({ analysis: analysisText });
     } catch (error) {
+      console.error('Error in workout analysis:', error);
       res.status(500).json({ message: "Failed to analyze workouts" });
     }
   });

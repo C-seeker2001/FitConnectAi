@@ -925,4 +925,39 @@ export class DatabaseStorage implements IStorage {
 
     return result[0]?.count || 0;
   }
+  
+  // Workout Analysis Caching methods
+  async getWorkoutAnalysis(userId: number): Promise<WorkoutAnalysis | undefined> {
+    const [analysis] = await db
+      .select()
+      .from(workoutAnalyses)
+      .where(eq(workoutAnalyses.userId, userId));
+    
+    return analysis || undefined;
+  }
+  
+  async saveWorkoutAnalysis(analysisData: InsertWorkoutAnalysis): Promise<WorkoutAnalysis> {
+    const [analysis] = await db
+      .insert(workoutAnalyses)
+      .values({
+        ...analysisData,
+        updatedAt: new Date(), // Ensure the updatedAt is set to now
+      })
+      .returning();
+    
+    return analysis;
+  }
+  
+  async updateWorkoutAnalysis(id: number, analysisData: Partial<WorkoutAnalysis>): Promise<WorkoutAnalysis> {
+    const [updatedAnalysis] = await db
+      .update(workoutAnalyses)
+      .set({
+        ...analysisData,
+        updatedAt: new Date(), // Always update the timestamp
+      })
+      .where(eq(workoutAnalyses.id, id))
+      .returning();
+    
+    return updatedAnalysis;
+  }
 }
