@@ -98,9 +98,36 @@ export default function WorkoutForm({
     },
   });
 
-  // Set template exercises when a template is selected
+  // Set form data based on whether we're editing or using a template
   useEffect(() => {
-    if (initialTemplate && open) {
+    // For editing an existing workout
+    if (workoutToEdit && open && isEditing) {
+      // Set the initial useMetric state
+      setUseMetric(workoutToEdit.useMetric);
+      
+      // Convert workout data to form format
+      const exerciseArray = workoutToEdit.exercises.map((exercise: string) => {
+        return {
+          name: exercise,
+          sets: workoutToEdit.sets && workoutToEdit.sets[exercise] 
+            ? workoutToEdit.sets[exercise].map((set: any) => ({
+                weight: set.weight || 0,
+                reps: set.reps || 0,
+                duration: set.duration || undefined,
+                distance: set.distance || undefined
+              }))
+            : [{ weight: 40, reps: 10 }] // Default values if no sets found
+        };
+      });
+      
+      form.reset({
+        name: workoutToEdit.name,
+        exercises: exerciseArray.length > 0 ? exerciseArray : [{ name: "", sets: [{ weight: 0, reps: 0 }] }],
+        shareToFeed: !!workoutToEdit.shareToFeed, // Default to true if not specified
+      });
+    } 
+    // For a new workout from template
+    else if (initialTemplate && open && !isEditing) {
       if (typeof initialTemplate === 'string') {
         // Handle string type (predefined template name)
         const template = EXERCISE_TEMPLATES[initialTemplate as keyof typeof EXERCISE_TEMPLATES] || [];
@@ -125,7 +152,7 @@ export default function WorkoutForm({
         });
       }
     }
-  }, [initialTemplate, open, form]);
+  }, [initialTemplate, workoutToEdit, open, form, isEditing]);
 
   const addExercise = () => {
     const currentExercises = form.getValues().exercises;
@@ -145,7 +172,7 @@ export default function WorkoutForm({
     }
   };
 
-  const workoutMutation = useMutation({
+  const createWorkoutMutation = useMutation({
     mutationFn: async (data: WorkoutFormValues) => {
       const response = await apiRequest('POST', '/api/workouts', {
         ...data,
@@ -172,15 +199,49 @@ export default function WorkoutForm({
     },
   });
 
+  const updateWorkoutMutation = useMutation({
+    mutationFn: async (data: WorkoutFormValues) => {
+      if (!workoutToEdit || !workoutToEdit.id) {
+        throw new Error("No workout ID provided");
+      }
+      const response = await apiRequest('PATCH', `/api/workouts/${workoutToEdit.id}`, {
+        ...data,
+        useMetric,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Workout updated",
+        description: "Your workout has been updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/workouts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      onClose();
+      form.reset();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update workout. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: WorkoutFormValues) => {
-    workoutMutation.mutate(data);
+    if (isEditing && workoutToEdit) {
+      updateWorkoutMutation.mutate(data);
+    } else {
+      createWorkoutMutation.mutate(data);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Start Workout</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Workout" : "Start Workout"}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -256,8 +317,14 @@ export default function WorkoutForm({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={workoutMutation.isPending}>
-                {workoutMutation.isPending ? "Starting..." : "Start Workout"}
+              <Button 
+                type="submit" 
+                disabled={createWorkoutMutation.isPending || updateWorkoutMutation.isPending}
+              >
+                {isEditing 
+                  ? (updateWorkoutMutation.isPending ? "Updating..." : "Update Workout") 
+                  : (createWorkoutMutation.isPending ? "Starting..." : "Start Workout")
+                }
               </Button>
             </DialogFooter>
           </form>
