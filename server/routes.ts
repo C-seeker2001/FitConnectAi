@@ -498,12 +498,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Not authorized to update this workout" });
       }
 
-      // Update only the core workout properties for now
-      const updatedWorkout = await storage.updateWorkout(workoutId, {
+      // Prepare update data
+      const updateData: Partial<Workout> = {
         name: req.body.name,
         useMetric: req.body.useMetric,
         notes: req.body.notes,
-      });
+      };
+      
+      // If workout is marked as complete, set the endTime
+      if (req.body.complete === true && !existingWorkout.endTime) {
+        updateData.endTime = new Date();
+      }
+      
+      // Update the workout
+      const updatedWorkout = await storage.updateWorkout(workoutId, updateData);
       
       res.json(updatedWorkout);
     } catch (error) {

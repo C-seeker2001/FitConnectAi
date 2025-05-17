@@ -199,6 +199,8 @@ export default function WorkoutForm({
     },
   });
 
+  const [completeWorkout, setCompleteWorkout] = useState(false);
+
   const updateWorkoutMutation = useMutation({
     mutationFn: async (data: WorkoutFormValues) => {
       if (!workoutToEdit || !workoutToEdit.id) {
@@ -210,6 +212,7 @@ export default function WorkoutForm({
         name: data.name,
         useMetric: useMetric,
         notes: data.notes || null,
+        complete: completeWorkout,
       };
       
       const response = await apiRequest('PATCH', `/api/workouts/${workoutToEdit.id}`, updateData);
@@ -288,34 +291,49 @@ export default function WorkoutForm({
               </Button>
             </div>
 
-            <div className="flex items-center justify-between">
-              <FormField
-                control={form.control}
-                name="shareToFeed"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">Share to feed</FormLabel>
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex items-center space-x-2">
-                <span className="text-sm">Units:</span>
-                <Switch
-                  checked={useMetric}
-                  onCheckedChange={setUseMetric}
-                  id="unit-toggle"
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center justify-between">
+                <FormField
+                  control={form.control}
+                  name="shareToFeed"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">Share to feed</FormLabel>
+                    </FormItem>
+                  )}
                 />
-                <span className={`text-sm font-medium ${useMetric ? "text-accent" : ""}`}>
-                  {useMetric ? "kg" : "lbs"}
-                </span>
+
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm">Units:</span>
+                  <Switch
+                    checked={useMetric}
+                    onCheckedChange={setUseMetric}
+                    id="unit-toggle"
+                  />
+                  <span className={`text-sm font-medium ${useMetric ? "text-accent" : ""}`}>
+                    {useMetric ? "kg" : "lbs"}
+                  </span>
+                </div>
               </div>
+              
+              {isEditing && (
+                <div className="flex items-center space-x-2 border-t pt-4">
+                  <Checkbox
+                    checked={completeWorkout}
+                    onCheckedChange={setCompleteWorkout}
+                    id="complete-workout"
+                  />
+                  <label htmlFor="complete-workout" className="text-sm font-medium cursor-pointer">
+                    Mark workout as completed
+                  </label>
+                </div>
+              )}
             </div>
 
             <DialogFooter>
