@@ -53,6 +53,11 @@ export default function Workouts() {
     queryKey: ['/api/workouts/templates'],
     enabled: !!user && tab === "templates",
   });
+  
+  const { data: workoutDetails, isLoading: workoutDetailsLoading } = useQuery({
+    queryKey: ['/api/workouts', selectedWorkout?.id],
+    enabled: !!selectedWorkout?.id,
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -379,57 +384,109 @@ export default function Workouts() {
           </DialogHeader>
           
           {selectedWorkout && (
-            <div className="space-y-4">
-              <div className="text-sm text-secondary">
-                {new Date(selectedWorkout.createdAt).toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  month: 'long', 
-                  day: 'numeric', 
-                  year: 'numeric' 
-                })}
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <Card>
-                  <CardContent className="p-4 flex items-center">
-                    <Clock className="h-5 w-5 mr-2 text-accent" />
-                    <div>
-                      <p className="font-medium">Duration</p>
-                      <p className="text-secondary">{selectedWorkout.duration}</p>
-                    </div>
-                  </CardContent>
-                </Card>
+            <>
+              <div className="space-y-4">
+                <div className="text-sm text-secondary">
+                  {new Date(selectedWorkout.createdAt).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                  })}
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <Card>
+                    <CardContent className="p-4 flex items-center">
+                      <Clock className="h-5 w-5 mr-2 text-accent" />
+                      <div>
+                        <p className="font-medium">Duration</p>
+                        <p className="text-secondary">{selectedWorkout.duration || "In progress"}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="p-4 flex items-center">
+                      <Dumbbell className="h-5 w-5 mr-2 text-accent" />
+                      <div>
+                        <p className="font-medium">Volume</p>
+                        <p className="text-secondary">{selectedWorkout.volume} {selectedWorkout.useMetric ? 'kg' : 'lbs'}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
                 
                 <Card>
-                  <CardContent className="p-4 flex items-center">
-                    <Dumbbell className="h-5 w-5 mr-2 text-accent" />
-                    <div>
-                      <p className="font-medium">Volume</p>
-                      <p className="text-secondary">{selectedWorkout.volume} {selectedWorkout.useMetric ? 'kg' : 'lbs'}</p>
-                    </div>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Exercises</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {workoutDetails && workoutDetails.detailedExercises && workoutDetails.detailedExercises.length > 0 ? (
+                      <div className="space-y-4">
+                        {workoutDetails.detailedExercises.map((exercise: any, index: number) => (
+                          <div key={index} className="border rounded-md overflow-hidden">
+                            <div className="bg-gray-50 p-3 flex items-center">
+                              <ClipboardList className="h-4 w-4 mr-2 text-accent" />
+                              <span className="font-medium">{exercise.name}</span>
+                            </div>
+                            
+                            <div className="p-3">
+                              <div className="text-xs text-secondary mb-2">Sets</div>
+                              <div className="space-y-2">
+                                {exercise.sets && exercise.sets.map((set: any, setIndex: number) => (
+                                  <div key={setIndex} className="grid grid-cols-3 gap-2 text-sm">
+                                    <div className="bg-gray-100 p-2 rounded">
+                                      <div className="text-xs text-secondary">Set {setIndex + 1}</div>
+                                    </div>
+                                    {set.weight !== undefined && (
+                                      <div className="bg-gray-100 p-2 rounded">
+                                        <div className="text-xs text-secondary">Weight</div>
+                                        <div>{set.weight} {workoutDetails.useMetric ? 'kg' : 'lbs'}</div>
+                                      </div>
+                                    )}
+                                    {set.reps !== undefined && (
+                                      <div className="bg-gray-100 p-2 rounded">
+                                        <div className="text-xs text-secondary">Reps</div>
+                                        <div>{set.reps}</div>
+                                      </div>
+                                    )}
+                                    {set.duration !== undefined && (
+                                      <div className="bg-gray-100 p-2 rounded">
+                                        <div className="text-xs text-secondary">Duration</div>
+                                        <div>{set.duration} min</div>
+                                      </div>
+                                    )}
+                                    {set.distance !== undefined && (
+                                      <div className="bg-gray-100 p-2 rounded">
+                                        <div className="text-xs text-secondary">Distance</div>
+                                        <div>{set.distance} km</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : selectedWorkout.exercises && selectedWorkout.exercises.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedWorkout.exercises.map((exercise: string, index: number) => (
+                          <div key={index} className="flex items-center p-2 bg-gray-50 rounded-md">
+                            <ClipboardList className="h-4 w-4 mr-2 text-accent" />
+                            <span>{exercise}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-secondary text-sm">No exercises recorded for this workout</p>
+                    )}
                   </CardContent>
                 </Card>
               </div>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Exercises</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {selectedWorkout.exercises && selectedWorkout.exercises.length > 0 ? (
-                    <div className="space-y-3">
-                      {selectedWorkout.exercises.map((exercise: string, index: number) => (
-                        <div key={index} className="flex items-center p-2 bg-gray-50 rounded-md">
-                          <ClipboardList className="h-4 w-4 mr-2 text-accent" />
-                          <span>{exercise}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-secondary text-sm">No exercises recorded for this workout</p>
-                  )}
-                </CardContent>
-              </Card>
+            </>
+          )}
               
               {selectedWorkout.notes && (
                 <Card>
