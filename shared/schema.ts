@@ -176,6 +176,24 @@ export const insertProgramRatingSchema = createInsertSchema(programRatings).pick
   comment: true,
 });
 
+// Workout Analyses table for caching AI analysis results
+export const workoutAnalyses = pgTable("workout_analyses", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  analysis: text("analysis").notNull(),
+  lastWorkoutDate: timestamp("last_workout_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  workoutCount: integer("workout_count").notNull(),
+});
+
+export const insertWorkoutAnalysisSchema = createInsertSchema(workoutAnalyses).pick({
+  userId: true,
+  analysis: true,
+  lastWorkoutDate: true,
+  workoutCount: true,
+});
+
 // Note: Relations are disabled for now as we're using direct SQL queries
 
 // Types
@@ -208,3 +226,6 @@ export type InsertProgram = z.infer<typeof insertProgramSchema>;
 
 export type ProgramRating = typeof programRatings.$inferSelect;
 export type InsertProgramRating = z.infer<typeof insertProgramRatingSchema>;
+
+export type WorkoutAnalysis = typeof workoutAnalyses.$inferSelect;
+export type InsertWorkoutAnalysis = z.infer<typeof insertWorkoutAnalysisSchema>;

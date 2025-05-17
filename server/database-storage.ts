@@ -14,6 +14,8 @@ import {
   InsertLike,
   Follow,
   InsertFollow,
+  WorkoutAnalysis,
+  InsertWorkoutAnalysis,
   users,
   workouts,
   exercises,
@@ -22,6 +24,7 @@ import {
   comments,
   likes,
   follows,
+  workoutAnalyses,
 } from "@shared/schema";
 
 // Import SetModel type separately to avoid collision with JavaScript's built-in Set

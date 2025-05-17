@@ -15,6 +15,8 @@ import {
   InsertLike,
   Follow,
   InsertFollow,
+  WorkoutAnalysis,
+  InsertWorkoutAnalysis,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -71,6 +73,11 @@ export interface IStorage {
   deleteFollow(followerId: number, followingId: number): Promise<boolean>;
   getUserFollowerCount(userId: number): Promise<number>;
   getUserFollowingCount(userId: number): Promise<number>;
+  
+  // Workout Analysis Caching methods
+  getWorkoutAnalysis(userId: number): Promise<WorkoutAnalysis | undefined>;
+  saveWorkoutAnalysis(analysisData: InsertWorkoutAnalysis): Promise<WorkoutAnalysis>;
+  updateWorkoutAnalysis(id: number, analysisData: Partial<WorkoutAnalysis>): Promise<WorkoutAnalysis>;
 }
 
 export class MemStorage implements IStorage {
