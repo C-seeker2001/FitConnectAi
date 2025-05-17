@@ -475,6 +475,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update an existing workout
+  app.patch("/api/workouts/:id", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const workoutId = parseInt(req.params.id);
+      if (isNaN(workoutId)) {
+        return res.status(400).json({ message: "Invalid workout ID" });
+      }
+
+      // Get the workout to check ownership
+      const existingWorkout = await storage.getWorkout(workoutId);
+      if (!existingWorkout) {
+        return res.status(404).json({ message: "Workout not found" });
+      }
+
+      // Check if the user owns this workout
+      if (existingWorkout.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Not authorized to update this workout" });
+      }
+
+      // Update the workout
+      const updatedWorkout = await storage.updateWorkout(workoutId, req.body);
+      
+      res.json(updatedWorkout);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error("Error updating workout:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Create a new workout
   app.post("/api/workouts", async (req, res) => {
     if (!req.session.userId) {

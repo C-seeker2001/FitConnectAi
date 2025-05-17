@@ -74,9 +74,17 @@ interface WorkoutFormProps {
   open: boolean;
   onClose: () => void;
   initialTemplate?: string | any | null;
+  workoutToEdit?: any | null;
+  isEditing?: boolean;
 }
 
-export default function WorkoutForm({ open, onClose, initialTemplate }: WorkoutFormProps) {
+export default function WorkoutForm({ 
+  open, 
+  onClose, 
+  initialTemplate, 
+  workoutToEdit = null,
+  isEditing = false 
+}: WorkoutFormProps) {
   const [useMetric, setUseMetric] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
