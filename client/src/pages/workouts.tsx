@@ -40,6 +40,7 @@ export default function Workouts() {
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEdited, setIsEdited] = useState(false);
 
   // Get current date for calendar navigation
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -53,7 +54,10 @@ export default function Workouts() {
   // Refetch workouts when showWorkoutForm closes to ensure we have the latest data
   useEffect(() => {
     if (!showWorkoutForm && user) {
-      refetchWorkouts();
+      // Force a refetch when the form closes
+      setTimeout(() => {
+        refetchWorkouts();
+      }, 100);
     }
   }, [showWorkoutForm, refetchWorkouts, user]);
 
