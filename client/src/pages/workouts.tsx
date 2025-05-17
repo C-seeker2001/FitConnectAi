@@ -39,6 +39,7 @@ export default function Workouts() {
   const [filter, setFilter] = useState("all");
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Get current date for calendar navigation
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -371,9 +372,12 @@ export default function Workouts() {
         open={showWorkoutForm} 
         onClose={() => {
           setShowWorkoutForm(false);
+          setIsEditing(false);
           setSelectedTemplate(null);
         }} 
         initialTemplate={selectedTemplate}
+        workoutToEdit={isEditing ? selectedWorkout : null}
+        isEditing={isEditing}
       />
 
       {/* Workout Details Dialog */}
@@ -453,7 +457,11 @@ export default function Workouts() {
             <Button variant="outline" onClick={() => setSelectedWorkout(null)}>
               Close
             </Button>
-            <Button onClick={() => alert("Edit functionality will be implemented soon")}>
+            <Button onClick={() => {
+              setIsEditing(true);
+              setShowWorkoutForm(true);
+              // Keep the dialog open until the form closes
+            }}>
               Edit Workout
             </Button>
           </DialogFooter>
