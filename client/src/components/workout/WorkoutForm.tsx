@@ -73,7 +73,7 @@ type WorkoutFormValues = z.infer<typeof workoutFormSchema>;
 interface WorkoutFormProps {
   open: boolean;
   onClose: () => void;
-  initialTemplate?: string | null;
+  initialTemplate?: string | any | null;
 }
 
 export default function WorkoutForm({ open, onClose, initialTemplate }: WorkoutFormProps) {
@@ -93,12 +93,29 @@ export default function WorkoutForm({ open, onClose, initialTemplate }: WorkoutF
   // Set template exercises when a template is selected
   useEffect(() => {
     if (initialTemplate && open) {
-      const template = EXERCISE_TEMPLATES[initialTemplate as keyof typeof EXERCISE_TEMPLATES] || [];
-      form.reset({
-        name: initialTemplate === "Custom" ? "" : `${initialTemplate} Workout`,
-        exercises: template.length > 0 ? template : [{ name: "", sets: [{ weight: 0, reps: 0 }] }],
-        shareToFeed: true,
-      });
+      if (typeof initialTemplate === 'string') {
+        // Handle string type (predefined template name)
+        const template = EXERCISE_TEMPLATES[initialTemplate as keyof typeof EXERCISE_TEMPLATES] || [];
+        form.reset({
+          name: initialTemplate === "Custom" ? "" : `${initialTemplate} Workout`,
+          exercises: template.length > 0 ? template : [{ name: "", sets: [{ weight: 0, reps: 0 }] }],
+          shareToFeed: true,
+        });
+      } else {
+        // Handle object type (template from API)
+        const exerciseArray = initialTemplate.exercises.map((exercise: string) => {
+          return {
+            name: exercise,
+            sets: [{ weight: 40, reps: 10 }] // Default values
+          };
+        });
+        
+        form.reset({
+          name: initialTemplate.name,
+          exercises: exerciseArray.length > 0 ? exerciseArray : [{ name: "", sets: [{ weight: 0, reps: 0 }] }],
+          shareToFeed: true,
+        });
+      }
     }
   }, [initialTemplate, open, form]);
 

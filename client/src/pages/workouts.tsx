@@ -29,6 +29,7 @@ export default function Workouts() {
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
   const [tab, setTab] = useState("history");
   const [filter, setFilter] = useState("all");
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
 
   // Get current date for calendar navigation
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -319,7 +320,15 @@ export default function Workouts() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={() => {
+                        setSelectedTemplate(template);
+                        setShowWorkoutForm(true);
+                      }}
+                    >
                       Use Template
                     </Button>
                   </CardFooter>
@@ -341,7 +350,11 @@ export default function Workouts() {
 
       <WorkoutForm 
         open={showWorkoutForm} 
-        onClose={() => setShowWorkoutForm(false)} 
+        onClose={() => {
+          setShowWorkoutForm(false);
+          setSelectedTemplate(null);
+        }} 
+        initialTemplate={selectedTemplate}
       />
     </div>
   );
