@@ -248,30 +248,39 @@ export default function PostItem({ post }: PostProps) {
           <div className="mt-3 space-y-3">
             {post.comments?.length > 0 ? (
               <>
-                {/* First filter and render top-level comments (ones with no parentId) */}
-                {post.comments
-                  .filter((comment: any) => !comment.parentId)
-                  .map((comment: any) => {
-                    // Find any replies to this comment
-                    const replies = post.comments.filter((reply: any) => reply.parentId === comment.id);
+                {/* Create a function to render comments recursively */}
+                {(() => {
+                  // Helper function to recursively render comments and their replies
+                  const renderCommentWithReplies = (parentComment: any, level: number = 0) => {
+                    // Find direct replies to this comment
+                    const directReplies = post.comments.filter(
+                      (reply: any) => reply.parentId === parentComment.id
+                    );
                     
                     return (
-                      <div key={comment.id}>
-                        {/* Render the parent comment */}
-                        <CommentItem comment={comment} postId={post.id} />
+                      <div key={parentComment.id}>
+                        {/* Render the comment */}
+                        <CommentItem comment={parentComment} postId={post.id} />
                         
-                        {/* Render any replies with extra left margin to show nesting */}
-                        {replies.length > 0 && (
-                          <div className="ml-8 mt-2 space-y-3 border-l-2 border-gray-100 pl-3">
-                            {replies.map((reply: any) => (
-                              <CommentItem key={reply.id} comment={reply} postId={post.id} />
-                            ))}
+                        {/* Render replies if any exist */}
+                        {directReplies.length > 0 && (
+                          <div 
+                            className={`ml-8 mt-2 space-y-3 border-l-2 border-gray-100 pl-3 ${level > 0 ? 'border-gray-200' : ''}`}
+                          >
+                            {/* Recursively render each reply and its nested replies */}
+                            {directReplies.map((reply: any) => renderCommentWithReplies(reply, level + 1))}
                           </div>
                         )}
                       </div>
                     );
-                  })
-                }
+                  };
+                  
+                  // Start with top-level comments (no parentId)
+                  const topLevelComments = post.comments.filter((comment: any) => !comment.parentId);
+                  
+                  // Render each top-level comment and its reply tree
+                  return topLevelComments.map((comment: any) => renderCommentWithReplies(comment));
+                })()}
               </>
             ) : (
               <div className="text-center text-sm text-secondary">
