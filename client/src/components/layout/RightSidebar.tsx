@@ -36,10 +36,10 @@ export default function RightSidebar() {
   return (
     <div className="hidden lg:block w-72 desktop-sidebar sticky top-20">
       {/* Trending Programs */}
-      <div className="bg-card text-card-foreground rounded-lg shadow-sm p-4 mb-4 max-h-[60vh] overflow-y-auto">
+      <div className="bg-card text-card-foreground rounded-lg shadow-sm p-4 mb-4">
         <h3 className="font-semibold mb-3">Trending Programs</h3>
         
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1">
           {loadingPrograms ? (
             Array(3).fill(0).map((_, i) => (
               <div key={i} className="flex items-start">
