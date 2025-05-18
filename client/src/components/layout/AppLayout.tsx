@@ -21,7 +21,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const showMobileTabs = !isAuthPage && user;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-background">
       {!isAuthPage && <Header />}
 
       <main className="flex-grow">

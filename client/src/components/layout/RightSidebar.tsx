@@ -36,7 +36,7 @@ export default function RightSidebar() {
   return (
     <div className="hidden lg:block w-72 desktop-sidebar sticky top-20">
       {/* Trending Programs */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+      <div className="bg-card text-card-foreground rounded-lg shadow-sm p-4 mb-4">
         <h3 className="font-semibold mb-3">Trending Programs</h3>
         
         <div className="space-y-3">
@@ -54,7 +54,7 @@ export default function RightSidebar() {
           ) : (
             trendingPrograms?.map((program: any) => (
               <div key={program.id} className="flex items-start">
-                <div className="bg-gray-100 rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0 mr-3">
+                <div className="bg-muted rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0 mr-3">
                   {program.type === 'strength' && <Dumbbell className="text-accent h-6 w-6" />}
                   {program.type === 'cardio' && <Terminal className="text-accent h-6 w-6" />}
                   {program.type === 'mixed' && <Activity className="text-accent h-6 w-6" />}

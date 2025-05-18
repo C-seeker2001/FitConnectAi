@@ -22,7 +22,7 @@ export default function LeftSidebar() {
 
   return (
     <div className="hidden md:block w-64 desktop-sidebar sticky top-20">
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+      <div className="bg-card rounded-lg shadow-sm p-4 mb-4 text-card-foreground">
         {user && (
           <>
             <Link href={`/profile/${user.id}`} className="flex items-center mb-4">
@@ -63,8 +63,8 @@ export default function LeftSidebar() {
               />
             )}
 
-            <div className="mb-2 pb-4 border-b border-gray-100">
-              <div className="text-sm font-medium mb-1">This Week's Progress</div>
+            <div className="mb-2 pb-4 border-b border-border">
+              <div className="text-sm font-medium mb-1 text-foreground">This Week's Progress</div>
               <div className="flex items-center">
                 {loadingStats ? (
                   <Skeleton className="h-8 w-8 rounded-full mr-2" />
@@ -98,31 +98,31 @@ export default function LeftSidebar() {
 
         <ul className="space-y-2 mt-4">
           <li>
-            <Link href="/workouts" className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
+            <Link href="/workouts" className="flex items-center p-2 text-secondary hover:bg-muted rounded-lg">
               <Dumbbell className="h-5 w-5 mr-3" />
               <span>My Workouts</span>
             </Link>
           </li>
           <li>
-            <Link href="/progress" className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
+            <Link href="/progress" className="flex items-center p-2 text-secondary hover:bg-muted rounded-lg">
               <LineChart className="h-5 w-5 mr-3" />
               <span>Progress</span>
             </Link>
           </li>
           <li>
-            <Link href="/discover" className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
+            <Link href="/discover" className="flex items-center p-2 text-secondary hover:bg-muted rounded-lg">
               <Users className="h-5 w-5 mr-3" />
               <span>Discover</span>
             </Link>
           </li>
           <li>
-            <Link href="/programs" className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
+            <Link href="/programs" className="flex items-center p-2 text-secondary hover:bg-muted rounded-lg">
               <Bookmark className="h-5 w-5 mr-3" />
               <span>Saved Programs</span>
             </Link>
           </li>
           <li>
-            <Link href="/settings" className="flex items-center p-2 text-secondary hover:bg-gray-50 rounded-lg">
+            <Link href="/settings" className="flex items-center p-2 text-secondary hover:bg-muted rounded-lg">
               <Settings className="h-5 w-5 mr-3" />
               <span>Settings</span>
             </Link>
