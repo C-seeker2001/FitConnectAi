@@ -16,6 +16,16 @@
   @apply font-bold mb-2 mt-4;
 }
 
+/* Improve visibility of headers in dark mode */
+.dark .markdown h1,
+.dark .markdown h2,
+.dark .markdown h3,
+.dark .markdown h4,
+.dark .markdown h5,
+.dark .markdown h6 {
+  @apply text-white;
+}
+
 .markdown h1 {
   @apply text-2xl;
 }
