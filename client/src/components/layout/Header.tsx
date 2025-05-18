@@ -209,7 +209,6 @@ export default function Header() {
             </div>
           ) : (
             <div className="flex items-center space-x-4">
-              <ThemeToggle />
               <Button asChild variant="ghost">
                 <Link href="/auth?mode=login">Log in</Link>
               </Button>
