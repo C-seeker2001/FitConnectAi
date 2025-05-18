@@ -91,7 +91,7 @@ export default function RightSidebar() {
       </div>
       
       {/* Weekly Leaderboard */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+      <div className="bg-card text-card-foreground rounded-lg shadow-sm p-4 mb-4">
         <div className="flex justify-between items-center mb-3">
           <h3 className="font-semibold">Weekly Leaderboard</h3>
           <span className="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full">Friends</span>
@@ -129,7 +129,7 @@ export default function RightSidebar() {
                     <span className="text-sm font-medium">{entry.isCurrentUser ? 'You' : entry.username}</span>
                     <span className="font-mono text-sm font-medium">{entry.workouts}</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                  <div className="w-full bg-muted-foreground/20 rounded-full h-1.5 mt-1">
                     <div 
                       className="bg-accent h-1.5 rounded-full" 
                       style={{ width: `${(entry.workouts / leaderboard[0].workouts) * 100}%` }}
@@ -143,13 +143,13 @@ export default function RightSidebar() {
       </div>
       
       {/* Upcoming Workouts */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="bg-card text-card-foreground rounded-lg shadow-sm p-4">
         <h3 className="font-semibold mb-3">Upcoming Workouts</h3>
         
         <div className="space-y-3">
           {loadingUpcoming ? (
             Array(3).fill(0).map((_, i) => (
-              <div key={i} className="bg-gray-50 border border-gray-100 rounded-lg p-2">
+              <div key={i} className="bg-muted border border-border rounded-lg p-2">
                 <div className="flex justify-between items-center mb-1">
                   <Skeleton className="h-3 w-16" />
                   <Skeleton className="h-3 w-12" />
@@ -171,7 +171,7 @@ export default function RightSidebar() {
               return (
                 <div 
                   key={workout.id} 
-                  className={`${isToday ? 'bg-accent/10 border border-accent/20' : 'bg-gray-50 border border-gray-100'} rounded-lg p-2`}
+                  className={`${isToday ? 'bg-accent/10 border border-accent/20' : 'bg-muted border border-border'} rounded-lg p-2`}
                 >
                   <div className="flex justify-between items-center mb-1">
                     <span className={`text-xs font-medium ${isToday ? 'text-accent' : ''}`}>{dateLabel}</span>
