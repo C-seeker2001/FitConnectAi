@@ -781,7 +781,6 @@ export class DatabaseStorage implements IStorage {
       .values({
         ...postData,
         createdAt: new Date(),
-        image: null,
       })
       .returning();
 
