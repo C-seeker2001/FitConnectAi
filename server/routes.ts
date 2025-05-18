@@ -16,17 +16,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(
     session({
       cookie: { 
-        maxAge: 86400000, // 24 hours
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         httpOnly: true,
-        secure: false, // Set to false to work in development
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/'
       },
       store: new SessionStore({
         checkPeriod: 86400000, // prune expired entries every 24h
+        stale: false
       }),
-      resave: true,
-      saveUninitialized: true,
+      resave: false,
+      saveUninitialized: false,
+      rolling: true,
       secret: process.env.SESSION_SECRET || "fitsocial-secret-key",
       name: 'connect.sid'
     })
