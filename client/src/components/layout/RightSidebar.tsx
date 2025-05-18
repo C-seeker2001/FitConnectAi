@@ -97,7 +97,7 @@ export default function RightSidebar() {
           <span className="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full">Friends</span>
         </div>
         
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[30vh] overflow-y-auto pr-1">
           {loadingLeaderboard ? (
             Array(4).fill(0).map((_, i) => (
               <div key={i} className="flex items-center">
@@ -146,7 +146,7 @@ export default function RightSidebar() {
       <div className="bg-card text-card-foreground rounded-lg shadow-sm p-4">
         <h3 className="font-semibold mb-3">Upcoming Workouts</h3>
         
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[30vh] overflow-y-auto pr-1">
           {loadingUpcoming ? (
             Array(3).fill(0).map((_, i) => (
               <div key={i} className="bg-muted border border-border rounded-lg p-2">
