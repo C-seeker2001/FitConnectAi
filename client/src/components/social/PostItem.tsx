@@ -37,15 +37,43 @@ export default function PostItem({ post }: PostProps) {
         return apiRequest('POST', `/api/posts/${post.id}/like`);
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+    onMutate: async () => {
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: ['/api/posts'] });
+      
+      // Snapshot the previous value
+      const previousPosts = queryClient.getQueryData(['/api/posts']);
+      
+      // Optimistically update to the new value
+      queryClient.setQueryData(['/api/posts'], (old: any[]) => {
+        return old.map(p => {
+          if (p.id === post.id) {
+            return {
+              ...p,
+              liked: !post.liked,
+              likeCount: post.liked ? p.likeCount - 1 : p.likeCount + 1
+            };
+          }
+          return p;
+        });
+      });
+      
+      // Return a context object with the snapshot
+      return { previousPosts };
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      queryClient.setQueryData(['/api/posts'], context?.previousPosts);
+      
       toast({
         title: "Error",
         description: "Could not like/unlike post. Please try again.",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      // Always refetch after success or error to ensure server state
+      queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
     },
   });
 
