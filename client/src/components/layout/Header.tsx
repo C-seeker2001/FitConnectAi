@@ -17,15 +17,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Bell, LogOut, Settings, User, MessageSquare, Heart, UserPlus } from "lucide-react";
+import { Bell, LogOut, Settings, User, MessageSquare, Heart, UserPlus, Moon, Sun } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/components/ui/theme-provider";
 
 export default function Header() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   // Sample notifications - in a real app, these would come from an API
   const notifications = [
@@ -66,7 +68,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
+    <header className="bg-background border-b border-border sticky top-0 z-30">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -114,6 +116,19 @@ export default function Header() {
                 variant="ghost" 
                 size="icon" 
                 className="relative mr-2"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5 text-secondary" />
+                ) : (
+                  <Moon className="h-5 w-5 text-secondary" />
+                )}
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative mr-2"
                 onClick={() => setNotificationsOpen(true)}
               >
                 <Bell className="h-5 w-5 text-secondary" />
@@ -132,7 +147,7 @@ export default function Header() {
                       notifications.map(notification => (
                         <div 
                           key={notification.id} 
-                          className={`flex items-start p-3 rounded-lg ${notification.read ? 'bg-white' : 'bg-accent/5'}`}
+                          className={`flex items-start p-3 rounded-lg ${notification.read ? 'bg-card' : 'bg-accent/5'}`}
                         >
                           <div className="flex-shrink-0 mr-3 mt-1">
                             {notification.type === 'like' && (
