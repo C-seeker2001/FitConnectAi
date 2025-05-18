@@ -34,12 +34,12 @@ export default function RightSidebar() {
   tomorrow.setDate(tomorrow.getDate() + 1);
 
   return (
-    <div className="hidden lg:block w-72 desktop-sidebar sticky top-20">
+    <div className="hidden lg:block w-72 desktop-sidebar sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto pr-1">
       {/* Trending Programs */}
       <div className="bg-card text-card-foreground rounded-lg shadow-sm p-4 mb-4">
         <h3 className="font-semibold mb-3">Trending Programs</h3>
         
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[40vh] overflow-y-auto">
           {loadingPrograms ? (
             Array(3).fill(0).map((_, i) => (
               <div key={i} className="flex items-start">
