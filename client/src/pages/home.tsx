@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import QuickStart from "@/components/workout/QuickStart";
 import PostItem from "@/components/social/PostItem";
+import CreatePostForm from "@/components/social/CreatePostForm";
 import { useLocation, Link } from "wouter";
 import { Loader } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,6 +37,9 @@ export default function Home() {
     <div>
       {/* Quick Start Section */}
       <QuickStart />
+
+      {/* Create Post Form */}
+      <CreatePostForm />
 
       {/* Social Feed */}
       <div className="space-y-6">
