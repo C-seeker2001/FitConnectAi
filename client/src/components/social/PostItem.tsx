@@ -247,9 +247,32 @@ export default function PostItem({ post }: PostProps) {
           {/* Comments */}
           <div className="mt-3 space-y-3">
             {post.comments?.length > 0 ? (
-              post.comments.map((comment: any) => (
-                <CommentItem key={comment.id} comment={comment} postId={post.id} />
-              ))
+              <>
+                {/* First filter and render top-level comments (ones with no parentId) */}
+                {post.comments
+                  .filter((comment: any) => !comment.parentId)
+                  .map((comment: any) => {
+                    // Find any replies to this comment
+                    const replies = post.comments.filter((reply: any) => reply.parentId === comment.id);
+                    
+                    return (
+                      <div key={comment.id}>
+                        {/* Render the parent comment */}
+                        <CommentItem comment={comment} postId={post.id} />
+                        
+                        {/* Render any replies with extra left margin to show nesting */}
+                        {replies.length > 0 && (
+                          <div className="ml-8 mt-2 space-y-3 border-l-2 border-gray-100 pl-3">
+                            {replies.map((reply: any) => (
+                              <CommentItem key={reply.id} comment={reply} postId={post.id} />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                }
+              </>
             ) : (
               <div className="text-center text-sm text-secondary">
                 No comments yet. Be the first to comment!
