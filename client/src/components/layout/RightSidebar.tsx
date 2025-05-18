@@ -116,7 +116,7 @@ export default function RightSidebar() {
             leaderboard?.map((entry: any, index: number) => (
               <div 
                 key={entry.id} 
-                className={`flex items-center ${entry.isCurrentUser ? 'bg-gray-50 p-1 rounded-lg' : ''}`}
+                className={`flex items-center ${entry.isCurrentUser ? 'bg-muted p-1 rounded-lg' : ''}`}
               >
                 <div className="w-6 text-center mr-2 font-mono font-medium">{index + 1}</div>
                 <img 
