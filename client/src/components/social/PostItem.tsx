@@ -204,8 +204,15 @@ export default function PostItem({ post }: PostProps) {
 
       {/* Post Image (if present) */}
       {post.image && (
-        <div className="relative aspect-video">
-          <img src={post.image} alt="Post image" className="w-full h-full object-cover" />
+        <div className="px-4 pb-3">
+          <div className="relative rounded-lg overflow-hidden max-h-[400px]">
+            <img 
+              src={post.image} 
+              alt="Post image" 
+              className="w-full max-w-full object-contain" 
+              style={{ maxHeight: "400px" }}
+            />
+          </div>
         </div>
       )}
 
