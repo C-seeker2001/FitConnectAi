@@ -205,12 +205,12 @@ export default function PostItem({ post }: PostProps) {
       {/* Post Image (if present) */}
       {post.image && (
         <div className="px-4 pb-3">
-          <div className="relative rounded-lg overflow-hidden max-h-[400px]">
+          <div className="relative rounded-lg overflow-hidden border border-border bg-muted/30 flex justify-center">
             <img 
               src={post.image} 
               alt="Post image" 
-              className="w-full max-w-full object-contain" 
-              style={{ maxHeight: "400px" }}
+              className="object-contain max-w-full" 
+              style={{ maxHeight: "350px", width: "auto" }}
             />
           </div>
         </div>
