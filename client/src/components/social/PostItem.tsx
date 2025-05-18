@@ -117,7 +117,7 @@ export default function PostItem({ post }: PostProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-card rounded-lg shadow-sm overflow-hidden">
       {/* Post Header */}
       <div className="p-4">
         <div className="flex items-start">
@@ -128,7 +128,7 @@ export default function PostItem({ post }: PostProps) {
           <div className="flex-grow">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium">{post.user.username}</h3>
+                <h3 className="font-medium text-foreground">{post.user.username}</h3>
                 <p className="text-sm text-secondary">{formatTimeAgo(new Date(post.createdAt))}</p>
               </div>
               {user && (
@@ -152,7 +152,7 @@ export default function PostItem({ post }: PostProps) {
                 </DropdownMenu>
               )}
             </div>
-            <p className="mt-2">{post.content}</p>
+            <p className="mt-2 text-foreground">{post.content}</p>
           </div>
         </div>
       </div>
@@ -160,7 +160,7 @@ export default function PostItem({ post }: PostProps) {
       {/* Workout Summary Card (if present) */}
       {post.workout && (
         <div className="px-4 pb-2">
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+          <div className="bg-muted rounded-lg p-3 border border-border">
             <div className="flex items-center mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6.5 6.5h11"></path>
@@ -171,26 +171,26 @@ export default function PostItem({ post }: PostProps) {
                 <path d="M8 9v6"></path>
                 <path d="M16 9v6"></path>
               </svg>
-              <h4 className="font-medium">{post.workout.name}</h4>
+              <h4 className="font-medium text-foreground">{post.workout.name}</h4>
             </div>
             <div className="grid grid-cols-3 gap-2 text-sm">
               <div>
                 <div className="text-secondary">Duration</div>
-                <div className="font-mono font-medium">{post.workout.duration}</div>
+                <div className="font-mono font-medium text-foreground">{post.workout.duration}</div>
               </div>
               <div>
                 <div className="text-secondary">Volume</div>
-                <div className="font-mono font-medium">{post.workout.volume}{post.workout.useMetric ? ' kg' : ' lbs'}</div>
+                <div className="font-mono font-medium text-foreground">{post.workout.volume}{post.workout.useMetric ? ' kg' : ' lbs'}</div>
               </div>
               <div>
                 <div className="text-secondary">Exercises</div>
-                <div className="font-mono font-medium">{post.workout.exerciseCount}</div>
+                <div className="font-mono font-medium text-foreground">{post.workout.exerciseCount}</div>
               </div>
             </div>
             
             {post.workout.exercises && post.workout.exercises.length > 0 && (
-              <div className="mt-3 pt-2 border-t border-gray-200">
-                <div className="text-xs font-medium mb-1">Exercises Completed</div>
+              <div className="mt-3 pt-2 border-t border-border">
+                <div className="text-xs font-medium mb-1 text-foreground">Exercises Completed</div>
                 <div className="flex flex-wrap gap-1">
                   {post.workout.exercises.map((exercise: string, index: number) => (
                     <ExerciseTag key={index} name={exercise} />
@@ -210,7 +210,7 @@ export default function PostItem({ post }: PostProps) {
       )}
 
       {/* Post Actions */}
-      <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-between">
+      <div className="px-4 py-2 border-t border-border flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button 
             variant="ghost" 
@@ -221,7 +221,7 @@ export default function PostItem({ post }: PostProps) {
             <Heart 
               className={`h-5 w-5 mr-1 ${post.liked ? 'fill-accent text-accent' : 'text-secondary'}`} 
             />
-            <span className="text-sm font-medium">{post.likeCount}</span>
+            <span className="text-sm font-medium text-foreground">{post.likeCount}</span>
           </Button>
           <Button 
             variant="ghost" 
@@ -230,7 +230,7 @@ export default function PostItem({ post }: PostProps) {
             onClick={toggleComments}
           >
             <MessageSquare className="h-5 w-5 mr-1 text-secondary" />
-            <span className="text-sm font-medium">{post.commentCount}</span>
+            <span className="text-sm font-medium text-foreground">{post.commentCount}</span>
           </Button>
         </div>
         <Button variant="ghost" size="icon">
@@ -240,7 +240,7 @@ export default function PostItem({ post }: PostProps) {
 
       {/* Comments Section */}
       {showComments && (
-        <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+        <div className="px-4 py-3 bg-muted border-t border-border">
           {/* Comment Form */}
           <CommentForm postId={post.id} />
           
@@ -265,7 +265,7 @@ export default function PostItem({ post }: PostProps) {
                         {/* Render replies if any exist */}
                         {directReplies.length > 0 && (
                           <div 
-                            className={`ml-8 mt-2 space-y-3 border-l-2 border-gray-100 pl-3 ${level > 0 ? 'border-gray-200' : ''}`}
+                            className={`ml-8 mt-2 space-y-3 border-l-2 border-border pl-3 ${level > 0 ? 'border-border/70' : ''}`}
                           >
                             {/* Recursively render each reply and its nested replies */}
                             {directReplies.map((reply: any) => renderCommentWithReplies(reply, level + 1))}
