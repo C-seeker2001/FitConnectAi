@@ -34,7 +34,7 @@ export default function RightSidebar() {
   tomorrow.setDate(tomorrow.getDate() + 1);
 
   return (
-    <div className="hidden lg:block w-80 desktop-sidebar sticky top-20">
+    <div className="hidden lg:block w-80 desktop-sidebar sticky top-20 max-h-[calc(100vh-80px)] overflow-y-auto pr-2">
       {/* Trending Programs */}
       <div className="bg-card text-card-foreground rounded-lg shadow-sm p-4 mb-4">
         <h3 className="font-semibold mb-3">Trending Programs</h3>
