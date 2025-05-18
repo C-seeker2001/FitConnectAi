@@ -33,6 +33,7 @@ import { IStorage } from "./storage";
 import { db } from "./db";
 import { eq, and, desc, sql, gte, lte, count, inArray } from "drizzle-orm";
 import { getDay, startOfWeek, startOfMonth, addDays, addMonths, subMonths, format } from "date-fns";
+import { enrichWorkoutData } from "./feed-helper";
 
 export class DatabaseStorage implements IStorage {
   // User methods
@@ -738,15 +739,8 @@ export class DatabaseStorage implements IStorage {
           .where(eq(workouts.id, post.workoutId));
 
         if (workoutData) {
-          const exercisesList = await db
-            .select()
-            .from(exercises)
-            .where(eq(exercises.workoutId, workoutData.id));
-
-          workout = {
-            ...workoutData,
-            exerciseCount: exercisesList.length,
-          };
+          // Use the workout helper to enrich the workout with all necessary details
+          workout = await enrichWorkoutData(workoutData);
         }
       }
 
