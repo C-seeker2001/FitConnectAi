@@ -20,7 +20,6 @@ import {
 import { Bell, LogOut, Settings, User, MessageSquare, Heart, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default function Header() {
   const [location] = useLocation();
@@ -111,7 +110,6 @@ export default function Header() {
           {/* User Menu */}
           {user ? (
             <div className="flex items-center">
-              <ThemeToggle />
               <Button 
                 variant="ghost" 
                 size="icon" 
