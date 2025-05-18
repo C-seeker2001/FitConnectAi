@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import QuickStart from "@/components/workout/QuickStart";
 import PostItem from "@/components/social/PostItem";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Loader } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -67,9 +67,9 @@ export default function Home() {
               Follow other users or start posting your workouts to see content here.
             </p>
             <div className="flex justify-center">
-              <a href="/discover" className="text-accent font-medium">
+              <Link to="/discover" className="text-accent font-medium">
                 Discover users to follow
-              </a>
+              </Link>
             </div>
           </div>
         )}
