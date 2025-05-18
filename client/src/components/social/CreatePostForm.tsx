@@ -48,7 +48,7 @@ export default function CreatePostForm() {
         content,
       };
 
-      if (selectedWorkoutId) {
+      if (selectedWorkoutId && selectedWorkoutId !== "none") {
         postData.workoutId = parseInt(selectedWorkoutId);
       }
       
@@ -173,8 +173,8 @@ export default function CreatePostForm() {
                   <SelectValue placeholder="Select a workout" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
-                  {workouts?.map((workout: any) => (
+                  <SelectItem value="none">None</SelectItem>
+                  {workouts && workouts.map((workout: any) => (
                     <SelectItem key={workout.id} value={workout.id.toString()}>
                       {workout.name} ({new Date(workout.createdAt).toLocaleDateString()})
                     </SelectItem>
