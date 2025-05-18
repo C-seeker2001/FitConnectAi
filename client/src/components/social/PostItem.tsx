@@ -209,8 +209,8 @@ export default function PostItem({ post }: PostProps) {
             <img 
               src={post.image} 
               alt="Post image" 
-              className="object-contain max-w-full" 
-              style={{ maxHeight: "350px", width: "auto" }}
+              className="object-contain" 
+              style={{ maxHeight: "280px", maxWidth: "100%", width: "auto" }}
             />
           </div>
         </div>

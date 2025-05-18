@@ -34,7 +34,7 @@ export default function Home() {
   if (!user) return null;
 
   return (
-    <div>
+    <div className="max-w-[650px]">
       {/* Quick Start Section */}
       <QuickStart />
 
