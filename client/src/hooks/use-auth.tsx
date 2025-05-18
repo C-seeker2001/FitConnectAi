@@ -28,13 +28,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [_, navigate] = useLocation();
 
   // Fetch current user (if logged in)
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['/api/auth/me'],
-    retry: 1,
+    retry: false,
     staleTime: 300000, // 5 minutes
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
-    refetchOnMount: true
   });
 
   useEffect(() => {
