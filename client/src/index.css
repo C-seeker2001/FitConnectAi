@@ -46,6 +46,12 @@
   @apply font-bold;
 }
 
+/* Improve visibility of bold text in dark mode */
+.dark .markdown strong,
+.dark .markdown b {
+  @apply text-white font-extrabold;
+}
+
 .markdown em, 
 .markdown i {
   @apply italic;
