@@ -5,7 +5,7 @@ import * as schema from "@shared/schema";
 
 // Configure neon to work in Node.js environment
 neonConfig.webSocketConstructor = ws;
-
+// console.log(process.env.DATABASE_URL); Testing env file connection fro local test
 if (!process.env.DATABASE_URL) {
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?",
