@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
     "build": "vite build && esbuild server/**/*.ts --platform=node --packages=external --bundle --format=esm --outdir=dist/server",
-    "vercel-build": "npm run build && mkdir -p api/server && cp -r dist/server/* api/server/",
+    "vercel-build": "npm run build && node -e \"const fs=require('fs');const path=require('path');const serverDir=path.join(process.cwd(),'api','server');fs.mkdirSync(serverDir,{recursive:true});const srcDir=path.join(process.cwd(),'dist','server');fs.readdirSync(srcDir).forEach(f=>{fs.copyFileSync(path.join(srcDir,f),path.join(serverDir,f));});\"",
     "start": "NODE_ENV=production node dist/server/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push"

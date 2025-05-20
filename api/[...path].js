@@ -27,34 +27,76 @@ let routesModule;
 const initializeApp = async () => {
   if (!isInitialized) {
     try {
-      // Try different relative paths for routes module to handle both local and Vercel environments
+      // Debug info about the environment
+      console.log('Current working directory:', process.cwd());
+      console.log('Environment:', process.env.NODE_ENV);
+      
+      // Check if files exist
       try {
-        // First try the direct Vercel path, which is most likely in production
-        routesModule = await import('/var/task/dist/server/routes.js');
-        console.log('Successfully imported using Vercel path');
-      } catch (err) {
-        console.log('Vercel path failed, trying relative paths');
-        try {
-          routesModule = await import('../dist/server/routes.js');
-          console.log('Successfully imported using first relative path');
-        } catch (err2) {
-          console.log('First relative path failed, trying alternative path');
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        
+        // List potential module paths
+        const potentialPaths = [
+          '/var/task/dist/server/routes.js',  // Vercel direct path
+          path.join(process.cwd(), 'dist/server/routes.js'), // Absolute path using cwd
+          '../dist/server/routes.js',         // Relative path
+          '../../dist/server/routes.js',      // Alternative relative path
+          '/var/task/api/server/routes.js',   // Vercel API server path
+          './server/routes.js',               // Local server path
+        ];
+        
+        // Check which paths exist
+        for (const p of potentialPaths) {
           try {
-            routesModule = await import('../../dist/server/routes.js');
-            console.log('Successfully imported using second relative path');
-          } catch (err3) {
-            console.log('Second relative path failed, trying local server directory');
+            await fs.access(p);
+            console.log(`File exists: ${p}`);
+          } catch (e) {
+            console.log(`File does NOT exist: ${p}`);
+          }
+        }
+        
+        // Try to load the module from the first path that exists
+        let loaded = false;
+        for (const p of potentialPaths) {
+          try {
+            await fs.access(p);
+            console.log(`Attempting to import from: ${p}`);
+            routesModule = await import(p);
+            console.log(`Successfully imported from ${p}`);
+            loaded = true;
+            break;
+          } catch (e) {
+            console.log(`Failed to import from ${p}:`, e.message);
+          }
+        }
+        
+        if (!loaded) {
+          throw new Error('Could not load routes module from any path');
+        }
+      } catch (e) {
+        console.log('Error in file system operations:', e);
+        
+        // Fallback to the original approach if fs operations fail
+        try {
+          routesModule = await import('/var/task/dist/server/routes.js');
+        } catch (err) {
+          try {
+            routesModule = await import('../dist/server/routes.js');
+          } catch (err2) {
             try {
-              // Try the copy in api/server that our vercel-build script creates
-              routesModule = await import('./server/routes.js');
-              console.log('Successfully imported from local server directory');
-            } catch (err4) {
-              console.error('All import paths failed!');
-              throw new Error('Could not import routes module: ' + err4.message);
+              routesModule = await import('../../dist/server/routes.js');
+            } catch (err3) {
+              try {
+                routesModule = await import('./server/routes.js');
+              } catch (err4) {
+                throw new Error('Could not import routes module: ' + err4.message);
+              }
             }
           }
         }
       }
+      
       await routesModule.registerRoutes(app);
       isInitialized = true;
     } catch (error) {
