@@ -37,6 +37,66 @@ export async function registerRoutes(app) {
     next();
   };
 
+  // Debug endpoint - directly included in routes to save on function count
+  app.get("/api/debug", async (req, res) => {
+    try {
+      console.log("==== DEBUG ENDPOINT CALLED ====");
+      
+      // Check database connection
+      console.log("Testing database connection...");
+      
+      try {
+        // Check if users table exists and has data
+        const users = await db.query(`SELECT id, username, email FROM users LIMIT 5`);
+        console.log("USERS TABLE:", { 
+          count: users.length,
+          sample: users.map(u => ({ id: u.id, username: u.username }))
+        });
+        
+        // Check if follows table exists and has data
+        const follows = await db.query(`SELECT * FROM follows LIMIT 5`);
+        console.log("FOLLOWS TABLE:", { count: follows.length });
+        
+        // Check if posts table exists and has data
+        const posts = await db.query(`SELECT * FROM posts LIMIT 5`);
+        console.log("POSTS TABLE:", { count: posts.length });
+        
+        // Return debug information
+        return res.status(200).json({
+          status: "success",
+          database: {
+            connected: true,
+            tables: {
+              users: { count: users.length, hasData: users.length > 0 },
+              follows: { count: follows.length, hasData: follows.length > 0 },
+              posts: { count: posts.length, hasData: posts.length > 0 }
+            }
+          },
+          environment: {
+            nodeEnv: process.env.NODE_ENV,
+            vercel: process.env.VERCEL === '1'
+          },
+          session: req.session
+        });
+        
+      } catch (dbError) {
+        console.error("DATABASE CONNECTION ERROR:", dbError);
+        return res.status(500).json({
+          status: "error",
+          message: "Database connection or query failed",
+          error: dbError.message
+        });
+      }
+    } catch (error) {
+      console.error("GENERAL ERROR:", error);
+      return res.status(500).json({
+        status: "error",
+        message: "Debug endpoint failed",
+        error: error.message
+      });
+    }
+  });
+
   // Auth endpoints
   // Get current authenticated user
   app.get("/api/auth/me", async (req, res) => {
