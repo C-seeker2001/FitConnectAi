@@ -29,6 +29,14 @@ export async function registerRoutes(app) {
     })
   );
 
+  // Middleware to check auth
+  const requireAuth = (req, res, next) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    next();
+  };
+
   // Auth endpoints
   // Get current authenticated user
   app.get("/api/auth/me", async (req, res) => {
@@ -53,10 +61,24 @@ export async function registerRoutes(app) {
         return res.status(401).json({ message: "User not found" });
       }
 
+      // Get additional user stats
+      const followerCount = await getFollowerCount(userId);
+      const followingCount = await getFollowingCount(userId);
+      const postCount = await getPostCount(userId);
+
       // Don't send password to client
       const { password, ...userWithoutPassword } = user;
       console.log(`Auth check successful - User: ${user.username}`);
-      res.json(userWithoutPassword);
+      
+      // Add stats to user object
+      const userWithStats = {
+        ...userWithoutPassword,
+        followerCount,
+        followingCount,
+        postCount
+      };
+      
+      res.json(userWithStats);
     } catch (error) {
       console.error("Auth check error:", error);
       res.status(500).json({ message: "Server error" });
@@ -87,9 +109,23 @@ export async function registerRoutes(app) {
       req.session.userId = user.id;
       console.log(`User logged in successfully: ${username} (ID: ${user.id})`);
 
+      // Get additional user stats
+      const followerCount = await getFollowerCount(user.id);
+      const followingCount = await getFollowingCount(user.id);
+      const postCount = await getPostCount(user.id);
+
       // Don't send password to client
       const { password: _, ...userWithoutPassword } = user;
-      res.json(userWithoutPassword);
+      
+      // Add stats to user object
+      const userWithStats = {
+        ...userWithoutPassword,
+        followerCount,
+        followingCount,
+        postCount
+      };
+      
+      res.json(userWithStats);
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Server error" });
@@ -175,6 +211,311 @@ export async function registerRoutes(app) {
     });
   });
 
+  // -------------------- FEED ENDPOINTS --------------------
+  
+  // Get user feed
+  app.get("/api/feed", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      console.log(`Fetching feed for user ID: ${userId}`);
+      
+      // Get users the current user follows
+      const followingList = await db.query(
+        `SELECT following_id FROM follows WHERE follower_id = $1`,
+        [userId]
+      );
+      
+      // If user doesn't follow anyone, return empty feed
+      if (!followingList.length) {
+        console.log(`User ${userId} doesn't follow anyone, returning empty feed`);
+        return res.json([]);
+      }
+      
+      // Extract the user IDs
+      const followingIds = followingList.map(follow => follow.following_id);
+      // Add current user to see their own posts
+      followingIds.push(userId);
+      
+      // Get posts from those users, most recent first
+      const posts = await db.query(
+        `SELECT 
+          p.*,
+          u.username,
+          u.avatar,
+          (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
+          (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count,
+          EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND user_id = $1) as liked_by_me
+        FROM 
+          posts p
+        JOIN 
+          users u ON p.user_id = u.id
+        WHERE 
+          p.user_id = ANY($2)
+        ORDER BY 
+          p.created_at DESC
+        LIMIT 20`,
+        [userId, followingIds]
+      );
+      
+      console.log(`Found ${posts.length} posts for feed`);
+      res.json(posts);
+    } catch (error) {
+      console.error("Feed fetch error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // -------------------- USER ENDPOINTS --------------------
+
+  // Get user profile
+  app.get("/api/users/:username", async (req, res) => {
+    try {
+      const { username } = req.params;
+      console.log(`Fetching profile for username: ${username}`);
+      
+      // Get the user
+      const users = await db.query(
+        `SELECT id, username, email, avatar, bio, weekly_goal, created_at FROM users WHERE username = $1 LIMIT 1`, 
+        [username]
+      );
+      
+      if (!users.length) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const user = users[0];
+      
+      // Get stats
+      const followerCount = await getFollowerCount(user.id);
+      const followingCount = await getFollowingCount(user.id);
+      const postCount = await getPostCount(user.id);
+      
+      // If logged in, check if current user follows this user
+      let isFollowing = false;
+      if (req.session.userId) {
+        const followResult = await db.query(
+          `SELECT 1 FROM follows WHERE follower_id = $1 AND following_id = $2`,
+          [req.session.userId, user.id]
+        );
+        isFollowing = followResult.length > 0;
+      }
+      
+      res.json({
+        ...user,
+        followerCount,
+        followingCount,
+        postCount,
+        isFollowing
+      });
+    } catch (error) {
+      console.error("Profile fetch error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Get user posts
+  app.get("/api/users/:username/posts", async (req, res) => {
+    try {
+      const { username } = req.params;
+      console.log(`Fetching posts for username: ${username}`);
+      
+      // Get the user ID
+      const users = await db.query(
+        `SELECT id FROM users WHERE username = $1 LIMIT 1`, 
+        [username]
+      );
+      
+      if (!users.length) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const userId = users[0].id;
+      const currentUserId = req.session.userId || null;
+      
+      // Get posts
+      const posts = await db.query(
+        `SELECT 
+          p.*,
+          u.username,
+          u.avatar,
+          (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
+          (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count,
+          EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND user_id = $2) as liked_by_me
+        FROM 
+          posts p
+        JOIN 
+          users u ON p.user_id = u.id
+        WHERE 
+          p.user_id = $1
+        ORDER BY 
+          p.created_at DESC
+        LIMIT 20`,
+        [userId, currentUserId]
+      );
+      
+      res.json(posts);
+    } catch (error) {
+      console.error("User posts fetch error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // -------------------- FOLLOW ENDPOINTS --------------------
+  
+  // Get followers
+  app.get("/api/users/:username/followers", async (req, res) => {
+    try {
+      const { username } = req.params;
+      console.log(`Fetching followers for username: ${username}`);
+      
+      // Get the user ID
+      const users = await db.query(
+        `SELECT id FROM users WHERE username = $1 LIMIT 1`, 
+        [username]
+      );
+      
+      if (!users.length) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const userId = users[0].id;
+      
+      // Get followers
+      const followers = await db.query(
+        `SELECT 
+          u.id, u.username, u.avatar
+        FROM 
+          follows f
+        JOIN 
+          users u ON f.follower_id = u.id
+        WHERE 
+          f.following_id = $1
+        ORDER BY 
+          f.created_at DESC
+        LIMIT 100`,
+        [userId]
+      );
+      
+      res.json(followers);
+    } catch (error) {
+      console.error("Followers fetch error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  // Get following
+  app.get("/api/users/:username/following", async (req, res) => {
+    try {
+      const { username } = req.params;
+      console.log(`Fetching following for username: ${username}`);
+      
+      // Get the user ID
+      const users = await db.query(
+        `SELECT id FROM users WHERE username = $1 LIMIT 1`, 
+        [username]
+      );
+      
+      if (!users.length) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const userId = users[0].id;
+      
+      // Get following
+      const following = await db.query(
+        `SELECT 
+          u.id, u.username, u.avatar
+        FROM 
+          follows f
+        JOIN 
+          users u ON f.following_id = u.id
+        WHERE 
+          f.follower_id = $1
+        ORDER BY 
+          f.created_at DESC
+        LIMIT 100`,
+        [userId]
+      );
+      
+      res.json(following);
+    } catch (error) {
+      console.error("Following fetch error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  // Follow a user
+  app.post("/api/users/:username/follow", requireAuth, async (req, res) => {
+    try {
+      const { username } = req.params;
+      const followerId = req.session.userId;
+      
+      // Get the user to follow
+      const users = await db.query(
+        `SELECT id FROM users WHERE username = $1 LIMIT 1`, 
+        [username]
+      );
+      
+      if (!users.length) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const followingId = users[0].id;
+      
+      // Check if already following
+      const existingFollow = await db.query(
+        `SELECT 1 FROM follows WHERE follower_id = $1 AND following_id = $2`,
+        [followerId, followingId]
+      );
+      
+      if (existingFollow.length > 0) {
+        return res.status(400).json({ message: "Already following this user" });
+      }
+      
+      // Create follow
+      await db.query(
+        `INSERT INTO follows (follower_id, following_id, created_at) VALUES ($1, $2, $3)`,
+        [followerId, followingId, new Date().toISOString()]
+      );
+      
+      res.status(200).json({ message: "Successfully followed user" });
+    } catch (error) {
+      console.error("Follow error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  // Unfollow a user
+  app.delete("/api/users/:username/follow", requireAuth, async (req, res) => {
+    try {
+      const { username } = req.params;
+      const followerId = req.session.userId;
+      
+      // Get the user to unfollow
+      const users = await db.query(
+        `SELECT id FROM users WHERE username = $1 LIMIT 1`, 
+        [username]
+      );
+      
+      if (!users.length) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const followingId = users[0].id;
+      
+      // Delete follow
+      await db.query(
+        `DELETE FROM follows WHERE follower_id = $1 AND following_id = $2`,
+        [followerId, followingId]
+      );
+      
+      res.status(200).json({ message: "Successfully unfollowed user" });
+    } catch (error) {
+      console.error("Unfollow error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
   // Add a simple test endpoint
   app.get("/api/test", (req, res) => {
     res.status(200).json({
@@ -184,4 +525,29 @@ export async function registerRoutes(app) {
   });
 
   return app;
+}
+
+// Helper functions for counts
+async function getFollowerCount(userId) {
+  const result = await db.query(
+    `SELECT COUNT(*) as count FROM follows WHERE following_id = $1`,
+    [userId]
+  );
+  return parseInt(result[0]?.count || '0');
+}
+
+async function getFollowingCount(userId) {
+  const result = await db.query(
+    `SELECT COUNT(*) as count FROM follows WHERE follower_id = $1`,
+    [userId]
+  );
+  return parseInt(result[0]?.count || '0');
+}
+
+async function getPostCount(userId) {
+  const result = await db.query(
+    `SELECT COUNT(*) as count FROM posts WHERE user_id = $1`,
+    [userId]
+  );
+  return parseInt(result[0]?.count || '0');
 } 
