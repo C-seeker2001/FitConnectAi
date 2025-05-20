@@ -29,14 +29,30 @@ const initializeApp = async () => {
     try {
       // Try different relative paths for routes module to handle both local and Vercel environments
       try {
-        routesModule = await import('../dist/server/routes.js');
+        // First try the direct Vercel path, which is most likely in production
+        routesModule = await import('/var/task/dist/server/routes.js');
+        console.log('Successfully imported using Vercel path');
       } catch (err) {
-        console.log('First import path failed, trying alternative path');
+        console.log('Vercel path failed, trying relative paths');
         try {
-          routesModule = await import('../../dist/server/routes.js');
+          routesModule = await import('../dist/server/routes.js');
+          console.log('Successfully imported using first relative path');
         } catch (err2) {
-          console.log('Second import path failed, trying direct path');
-          routesModule = await import('/var/task/dist/server/routes.js');
+          console.log('First relative path failed, trying alternative path');
+          try {
+            routesModule = await import('../../dist/server/routes.js');
+            console.log('Successfully imported using second relative path');
+          } catch (err3) {
+            console.log('Second relative path failed, trying local server directory');
+            try {
+              // Try the copy in api/server that our vercel-build script creates
+              routesModule = await import('./server/routes.js');
+              console.log('Successfully imported from local server directory');
+            } catch (err4) {
+              console.error('All import paths failed!');
+              throw new Error('Could not import routes module: ' + err4.message);
+            }
+          }
         }
       }
       await routesModule.registerRoutes(app);
