@@ -225,6 +225,8 @@ export async function registerRoutes(app) {
         [userId]
       );
       
+      console.log(`User ${userId} follows ${followingList.length} users`);
+      
       // If user doesn't follow anyone, return empty feed
       if (!followingList.length) {
         console.log(`User ${userId} doesn't follow anyone, returning empty feed`);
@@ -236,7 +238,9 @@ export async function registerRoutes(app) {
       // Add current user to see their own posts
       followingIds.push(userId);
       
-      // Get posts from those users, most recent first
+      console.log('Feed user IDs:', followingIds);
+      
+      // Get posts from those users, most recent first - use IN clause instead of ANY
       const posts = await db.query(
         `SELECT 
           p.*,
@@ -250,11 +254,11 @@ export async function registerRoutes(app) {
         JOIN 
           users u ON p.user_id = u.id
         WHERE 
-          p.user_id = ANY($2)
+          p.user_id IN (${followingIds.map((_, i) => `$${i + 2}`).join(',')})
         ORDER BY 
           p.created_at DESC
         LIMIT 20`,
-        [userId, followingIds]
+        [userId, ...followingIds]
       );
       
       console.log(`Found ${posts.length} posts for feed`);
