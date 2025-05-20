@@ -27,8 +27,18 @@ let routesModule;
 const initializeApp = async () => {
   if (!isInitialized) {
     try {
-      // Dynamically import routes to ensure ESM compatibility
-      routesModule = await import('../dist/server/routes.js');
+      // Try different relative paths for routes module to handle both local and Vercel environments
+      try {
+        routesModule = await import('../dist/server/routes.js');
+      } catch (err) {
+        console.log('First import path failed, trying alternative path');
+        try {
+          routesModule = await import('../../dist/server/routes.js');
+        } catch (err2) {
+          console.log('Second import path failed, trying direct path');
+          routesModule = await import('/var/task/dist/server/routes.js');
+        }
+      }
       await routesModule.registerRoutes(app);
       isInitialized = true;
     } catch (error) {

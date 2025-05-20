@@ -45,8 +45,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async ({ username, password }: { username: string; password: string }) => {
-      const res = await apiRequest('POST', '/api/auth/login', { username, password });
-      return res.json();
+      // Try multiple endpoints in sequence until one works
+      try {
+        const res = await apiRequest('POST', '/api/direct-login', { username, password });
+        return res.json();
+      } catch (error) {
+        console.log('Direct login failed, trying auth login endpoint');
+        const res = await apiRequest('POST', '/api/auth/login', { username, password });
+        return res.json();
+      }
     },
     onSuccess: (data) => {
       setUser(data);
@@ -69,8 +76,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Register mutation
   const registerMutation = useMutation({
     mutationFn: async ({ username, password, email }: { username: string; password: string; email: string }) => {
-      const res = await apiRequest('POST', '/api/auth/register', { username, password, email });
-      return res.json();
+      // Try multiple endpoints in sequence until one works
+      try {
+        const res = await apiRequest('POST', '/api/direct-register', { username, password, email });
+        return res.json();
+      } catch (error) {
+        console.log('Direct register failed, trying auth register endpoint');
+        const res = await apiRequest('POST', '/api/auth/register', { username, password, email });
+        return res.json();
+      }
     },
     onSuccess: (data) => {
       setUser(data);
