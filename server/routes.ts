@@ -19,7 +19,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Use 'none' for cross-site in production
         path: '/'
       },
       store: new SessionStore({
