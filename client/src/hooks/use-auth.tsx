@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Fetch current user (if logged in)
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['/api/auth?operation=me'],
+    queryKey: ['/api/auth/me'],
     retry: false,
     staleTime: 300000, // 5 minutes
   });
@@ -45,13 +45,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async ({ username, password }: { username: string; password: string }) => {
-      // Use the consolidated auth endpoint
-      const res = await apiRequest('POST', '/api/auth?operation=login', { username, password });
-      return res.json();
+      // Try multiple endpoints in sequence until one works
+      try {
+        const res = await apiRequest('POST', '/api/standalone-login', { username, password });
+        return res.json();
+      } catch (error) {
+        console.log('Standalone login failed, trying direct login endpoint');
+        try {
+          const res = await apiRequest('POST', '/api/direct-login', { username, password });
+          return res.json();
+        } catch (error2) {
+          console.log('Direct login failed, trying auth login endpoint');
+          const res = await apiRequest('POST', '/api/auth/login', { username, password });
+          return res.json();
+        }
+      }
     },
     onSuccess: (data) => {
       setUser(data);
-      queryClient.setQueryData(['/api/auth?operation=me'], data);
+      queryClient.setQueryData(['/api/auth/me'], data);
       navigate('/');
       toast({
         title: "Logged in successfully",
@@ -70,13 +82,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Register mutation
   const registerMutation = useMutation({
     mutationFn: async ({ username, password, email }: { username: string; password: string; email: string }) => {
-      // Use the consolidated auth endpoint
-      const res = await apiRequest('POST', '/api/auth?operation=register', { username, password, email });
-      return res.json();
+      // Try multiple endpoints in sequence until one works
+      try {
+        const res = await apiRequest('POST', '/api/standalone-register', { username, password, email });
+        return res.json();
+      } catch (error) {
+        console.log('Standalone register failed, trying direct register endpoint');
+        try {
+          const res = await apiRequest('POST', '/api/direct-register', { username, password, email });
+          return res.json();
+        } catch (error2) {
+          console.log('Direct register failed, trying auth register endpoint');
+          const res = await apiRequest('POST', '/api/auth/register', { username, password, email });
+          return res.json();
+        }
+      }
     },
     onSuccess: (data) => {
       setUser(data);
-      queryClient.setQueryData(['/api/auth?operation=me'], data);
+      queryClient.setQueryData(['/api/auth/me'], data);
       navigate('/');
       toast({
         title: "Registration successful",
@@ -102,10 +126,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      // Logout is a simple client-side operation since we're not using sessions
-      // No need for a server call
+      await apiRequest('POST', '/api/auth/logout', {});
       setUser(null);
-      queryClient.setQueryData(['/api/auth?operation=me'], null);
+      queryClient.setQueryData(['/api/auth/me'], null);
       queryClient.invalidateQueries();
       toast({
         title: "Logged out successfully",
