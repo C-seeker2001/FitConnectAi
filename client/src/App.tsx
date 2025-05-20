@@ -7,6 +7,7 @@ import Profile from "@/pages/profile";
 import Auth from "@/pages/auth";
 import NotFound from "@/pages/not-found";
 import ProgramDetail from "@/pages/program";
+import Debug from "@/pages/debug";
 import AppLayout from "@/components/layout/AppLayout";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/components/ui/theme-provider";
@@ -24,6 +25,7 @@ function App() {
             <Route path="/profile/:id?" component={Profile} />
             <Route path="/auth" component={Auth} />
             <Route path="/program/:id" component={ProgramDetail} />
+            <Route path="/debug" component={Debug} />
             <Route component={NotFound} />
           </Switch>
         </AppLayout>

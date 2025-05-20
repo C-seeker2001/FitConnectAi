@@ -6,11 +6,11 @@
   "functions": {
     "api/*.js": {
       "memory": 1024,
-      "maxDuration": 10
+      "maxDuration": 60
     }
   },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 } 
